@@ -23,6 +23,6 @@ export default {
       main: true,
       browser: true,
     }),
-    uglify.uglify(),
+    uglify(),
   ],
 };
