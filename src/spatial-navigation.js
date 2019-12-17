@@ -1,54 +1,51 @@
 import Navigation from './navigation';
+import MinkowskiDistance from './minkowski-distance'
 
 class SpatialNavigation {
   constructor() {
-    this.handleFocused = this.handleFocused.bind(this);
-
     this.destroy();
-    this.bindFocusEvent();
   }
 
-  init() {
+  init = () => {
     Navigation.init();
     Navigation.focus();
     this.bindFocusEvent();
   }
 
-  destroy() {
+  destroy = () => {
     this.focusedPath = null;
 
     Navigation.uninit();
     this.unbindFocusEvent();
   }
 
-  bindFocusEvent() {
+  bindFocusEvent = () => {
     if (!this.listening) {
       this.listening = true;
       document.addEventListener('sn:focused', this.handleFocused);
     }
   }
 
-  unbindFocusEvent() {
+  unbindFocusEvent = () => {
     document.removeEventListener('sn:focused', this.handleFocused);
     this.listening = false;
   }
 
-  handleFocused(ev) {
+  handleFocused = (ev) => {
     if (this.focusedPath !== ev.detail.sectionId) {
-      Navigation.focus(ev.detail.sectionId);
+      this.setCurrentFocusedPath(ev.detail.sectionId)
     }
   }
 
-  getCurrentFocusedPath() {
-    return this.focusedPath;
-  }
+  getCurrentFocusedPath = () => this.focusedPath;
 
-  setCurrentFocusedPath(focusPath) {
+  setCurrentFocusedPath = (focusPath) => {
+    console.log('setCurrentFocusedPath called.')
     this.focusedPath = focusPath;
     Navigation.focus(focusPath);
   }
 
-  addFocusable(focusDOMElement, { focusPath, onEnterPressHandler }) {
+  addFocusable = (focusDOMElement, { focusPath, onEnterPressHandler }) => {
     if (!focusDOMElement || Navigation.getSectionId(focusDOMElement)) {
       return;
     }
@@ -65,7 +62,7 @@ class SpatialNavigation {
     Navigation.makeFocusable(sectionId);
   }
 
-  removeFocusable(focusDOMElement, { onEnterPressHandler }) {
+  removeFocusable = (focusDOMElement, { onEnterPressHandler }) => {
     const sectionId = Navigation.getSectionId(focusDOMElement);
     if (!sectionId) {
       return;
