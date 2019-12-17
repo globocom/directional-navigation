@@ -1,1 +1,3 @@
-export { default as JSTVNavigation } from './spatial-navigation';
+import SpatialNavigation from './spatial-navigation'
+
+export default { SpatialNavigation }
