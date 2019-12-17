@@ -6,11 +6,22 @@ import uglify from 'rollup-plugin-uglify';
 
 export default {
   input: 'src/index.js',
-  output: {
-    name: 'JSTVNavigation',
-    file: 'dist/bundle.umd.js',
-    format: 'umd',
-  },
+  output: [
+    {
+      file: 'dist/bundle.umd.js',
+      format: 'umd',
+      name: 'JSTVNavigation',
+    },
+    {
+      file: 'dist/js-tv-navigation.min.js',
+      format: 'umd',
+      name: 'JSTVNavigation',
+    },
+    {
+      file: 'dist/js-tv-navigation.esm.js',
+      format: 'es',
+    },
+  ],
   plugins: [
     flow(),
     babel({
