@@ -13,12 +13,12 @@ export default {
       name: 'TVNavigation',
     },
     {
-      file: 'dist/tv-spatial-navigation.min.js',
+      file: 'dist/tv-navigation.min.js',
       format: 'umd',
       name: 'TVNavigation',
     },
     {
-      file: 'dist/tv-spatial-navigation.esm.js',
+      file: 'dist/tv-navigation.esm.js',
       format: 'es',
     },
   ],
