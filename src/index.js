@@ -1,3 +1,1 @@
-import SpatialNavigation from './spatial-navigation'
-
-export default { SpatialNavigation }
+export { default as TVNavigation } from './tv-navigation';

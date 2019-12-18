@@ -10,15 +10,15 @@ export default {
     {
       file: 'dist/bundle.umd.js',
       format: 'umd',
-      name: 'JSTVNavigation',
+      name: 'TVNavigation',
     },
     {
-      file: 'dist/js-tv-navigation.min.js',
+      file: 'dist/tv-spatial-navigation.min.js',
       format: 'umd',
-      name: 'JSTVNavigation',
+      name: 'TVNavigation',
     },
     {
-      file: 'dist/js-tv-navigation.esm.js',
+      file: 'dist/tv-spatial-navigation.esm.js',
       format: 'es',
     },
   ],
