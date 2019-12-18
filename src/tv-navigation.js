@@ -1,7 +1,7 @@
 import Navigation from './navigation';
 import MinkowskiDistance from './minkowski-distance'
 
-class SpatialNavigation {
+class TVNavigation {
   constructor() {
     this.destroy();
   }
@@ -73,4 +73,4 @@ class SpatialNavigation {
   }
 }
 
-export default new SpatialNavigation();
+export default new TVNavigation();

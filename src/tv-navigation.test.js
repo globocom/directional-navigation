@@ -1,14 +1,14 @@
-import SpatialNavigation from '../src/spatial-navigation';
+import TVNavigation from '../src/tv-navigation';
 import Navigation from '../src/navigation'
 
-describe('SpatialNavigation', () => {
+describe('TVNavigation', () => {
   beforeEach(() => {
-    SpatialNavigation.setCurrentFocusedPath = jest.fn()
-    SpatialNavigation.init();
+    TVNavigation.setCurrentFocusedPath = jest.fn()
+    TVNavigation.init();
   });
 
   afterEach(() => {
-    SpatialNavigation.destroy();
+    TVNavigation.destroy();
   });
 
   describe('on initialize', () => {
@@ -18,33 +18,33 @@ describe('SpatialNavigation', () => {
       });
       document.dispatchEvent(event);
 
-      expect(SpatialNavigation.setCurrentFocusedPath).toHaveBeenCalled();
+      expect(TVNavigation.setCurrentFocusedPath).toHaveBeenCalled();
     });
 
     describe('when focusing the same focused element', () => {
       it('does nothing', () => {
-        SpatialNavigation.focusedPath = 'focusPath';
+        TVNavigation.focusedPath = 'focusPath';
 
         const event = new CustomEvent('sn:focused', {
           detail: { sectionId: 'focusPath' },
         });
         document.dispatchEvent(event);
 
-        expect(SpatialNavigation.setCurrentFocusedPath).not.toHaveBeenCalled();
+        expect(TVNavigation.setCurrentFocusedPath).not.toHaveBeenCalled();
       });
     });
   });
 
   describe('on destroy', () => {
     it('stops listening to sn:focused', () => {
-      SpatialNavigation.destroy();
+      TVNavigation.destroy();
 
       const event = new CustomEvent('sn:focused', {
         detail: { sectionId: 'focusPath' },
       });
       document.dispatchEvent(event);
 
-      expect(SpatialNavigation.setCurrentFocusedPath).not.toHaveBeenCalled();
+      expect(TVNavigation.setCurrentFocusedPath).not.toHaveBeenCalled();
     });
   });
 });
