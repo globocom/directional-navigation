@@ -11,6 +11,8 @@
   Fork from luke-chang/js-spatial-navigation
  */
 
+import MinkowskiDistance from './minkowski-distance'
+
 var GlobalConfig = {
     selector: '',           // can be a valid <extSelector> except "@" syntax.
     straightOnly: false,
@@ -262,6 +264,7 @@ var GlobalConfig = {
       for (var i = 0; i < destDistance.length; i++) {
         var distance = destDistance[i];
         var delta = distance(a) - distance(b);
+
         if (delta) {
           return delta;
         }
@@ -272,19 +275,12 @@ var GlobalConfig = {
     return destPriority.group;
   }
 
+  function filterCandidate(from, to) {
+    return true
+  }
+
   function navigate(target, direction, candidates, config) {
     if (!target || !direction || !candidates || !candidates.length) {
-      return null;
-    }
-
-    var rects = [];
-    for (var i = 0; i < candidates.length; i++) {
-      var rect = getRect(candidates[i]);
-      if (rect) {
-        rects.push(rect);
-      }
-    }
-    if (!rects.length) {
       return null;
     }
 
@@ -292,6 +288,25 @@ var GlobalConfig = {
     if (!targetRect) {
       return null;
     }
+
+    var rects = [];
+    candidates.forEach((candidate) => {
+      var rect = getRect(candidate);
+      if (rect) {
+        rects.push(rect);
+      }
+    })
+
+    if (!rects.length) {
+      return null;
+    }
+
+    const targetXY = [targetRect.center.x, targetRect.center.y]
+    rects.sort((a, b) => {
+      const distanceToA = MinkowskiDistance.calculate(targetXY, [a.center.x, a.center.y], 2)
+      const distanceToB = MinkowskiDistance.calculate(targetXY, [b.center.x, b.center.y], 2)
+      return distanceToA > distanceToB ? 1 : -1
+    });
 
     var distanceFunction = generateDistanceFunction(targetRect);
 
@@ -448,6 +463,8 @@ var GlobalConfig = {
       dest = destGroup[0].element;
     }
 
+    console.log('>>> dest ', dest)
+
     return dest;
   }
 
@@ -553,7 +570,7 @@ var GlobalConfig = {
 
   function getSectionId(elem) {
     for (var id in _sections) {
-      if (!_sections[id].disabled &&
+      if (!_sections[id].disabled && elem &&
           matchSelector(elem, _sections[id].selector)) {
         return id;
       }
@@ -589,8 +606,6 @@ var GlobalConfig = {
   }
 
   function fireEvent(elem, type, details, cancelable = true) {
-    console.log('[fireEvent] type: ', type, ', cancelable: ', cancelable)
-
     var evt = document.createEvent('CustomEvent');
     evt.initCustomEvent(EVENT_PREFIX + type, true, cancelable, details);
     return elem.dispatchEvent(evt);

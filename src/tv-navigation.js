@@ -1,5 +1,4 @@
-import Navigation from './navigation';
-import MinkowskiDistance from './minkowski-distance'
+import Navigation from './js-spatial-navigation';
 
 class TVNavigation {
   constructor() {
@@ -40,36 +39,39 @@ class TVNavigation {
   getCurrentFocusedPath = () => this.focusedPath;
 
   setCurrentFocusedPath = (focusPath) => {
-    console.log('setCurrentFocusedPath called.')
     this.focusedPath = focusPath;
     Navigation.focus(focusPath);
   }
 
-  addFocusable = (focusDOMElement, { focusPath, onEnterPressHandler }) => {
-    if (!focusDOMElement || Navigation.getSectionId(focusDOMElement)) {
+  addEventListener = (selector, event, fn) => {
+    document.querySelectorAll(selector).forEach((elem) => elem.addEventListener(event, fn))
+    return this
+  }
+
+  addFocusable = (config, onEnterPressHandler) => {
+    if (!config || Navigation.getSectionId(document.getElementById(config.id))) {
       return;
     }
 
-    this.removeFocusable(focusDOMElement, { onEnterPressHandler });
+    this.removeFocusable(config);
 
-    const params = [{ selector: focusDOMElement }];
-    if (focusPath) {
-      params.unshift(focusPath);
+    const sectionId = Navigation.add(config);
+
+    if (onEnterPressHandler) {
+      this.addEventListener(config.selector, 'sn:enter-down', onEnterPressHandler)
     }
 
-    focusDOMElement.addEventListener('sn:enter-down', onEnterPressHandler);
-    const sectionId = Navigation.add(...params);
     Navigation.makeFocusable(sectionId);
   }
 
-  removeFocusable = (focusDOMElement, { onEnterPressHandler }) => {
-    const sectionId = Navigation.getSectionId(focusDOMElement);
+  removeFocusable = (config) => {
+    const sectionId = Navigation.getSectionId(document.getElementById(config.id));
     if (!sectionId) {
       return;
     }
 
     Navigation.remove(sectionId);
-    focusDOMElement.removeEventListener('sn:enter-down', onEnterPressHandler);
+    document.querySelectorAll(config.selector).removeEventListener('sn:enter-down');
   }
 }
 

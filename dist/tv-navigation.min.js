@@ -1,1 +1,1289 @@
-!function(e,t){"object"==typeof exports&&"undefined"!=typeof module?t(exports):"function"==typeof define&&define.amd?define(["exports"],t):t(e.TVNavigation={})}(this,function(e){"use strict";var t="function"==typeof Symbol&&"symbol"==typeof Symbol.iterator?function(e){return typeof e}:function(e){return e&&"function"==typeof Symbol&&e.constructor===Symbol&&e!==Symbol.prototype?"symbol":typeof e},n={selector:"",straightOnly:!1,straightOverlapThreshold:.35,rememberSource:!1,disabled:!1,defaultElement:"",enterTo:"",leaveFor:null,restrict:"self-first",tabIndexIgnoreList:[],navigableFilter:null},r={4:"left",21:"left",37:"left",214:"left",205:"left",218:"left",5:"right",22:"right",39:"right",213:"right",206:"right",217:"right",29460:"up",19:"up",38:"up",211:"up",203:"up",215:"up",29461:"down",20:"down",40:"down",212:"down",204:"down",216:"down",29443:"enter",13:"enter",67:"enter",32:"enter",23:"enter",195:"enter"},o={left:"right",up:"down",right:"left",down:"up"},i="sn:",u="section-",a=0,s=!1,c=!1,f={},l=0,d="",v="",h=!1,p=Element.prototype.matches||Element.prototype.matchesSelector||Element.prototype.mozMatchesSelector||Element.prototype.webkitMatchesSelector||Element.prototype.msMatchesSelector||Element.prototype.oMatchesSelector||function(e){var t=(this.parentNode||this.document).querySelectorAll(e);return[].slice.call(t).indexOf(this)>=0};function g(e){var t=e.getBoundingClientRect(),n={left:t.left,top:t.top,right:t.right,bottom:t.bottom,width:t.width,height:t.height};return n.element=e,n.center={x:n.left+Math.floor(n.width/2),y:n.top+Math.floor(n.height/2)},n.center.left=n.center.right=n.center.x,n.center.top=n.center.bottom=n.center.y,n}function b(e,t,n){for(var r=[[],[],[],[],[],[],[],[],[]],o=0;o<e.length;o++){var i,u,a=e[o],s=a.center;if(i=s.x<t.left?0:s.x<=t.right?1:2,r[u=3*(s.y<t.top?0:s.y<=t.bottom?1:2)+i].push(a),-1!==[0,2,6,8].indexOf(u)){var c=n;a.left<=t.right-t.width*c&&(2===u?r[1].push(a):8===u&&r[7].push(a)),a.right>=t.left+t.width*c&&(0===u?r[1].push(a):6===u&&r[7].push(a)),a.top<=t.bottom-t.height*c&&(6===u?r[3].push(a):8===u&&r[5].push(a)),a.bottom>=t.top+t.height*c&&(0===u?r[3].push(a):2===u&&r[5].push(a))}}return r}function m(e,t,n,r){if(!(e&&t&&n&&n.length))return null;for(var o=[],i=0;i<n.length;i++){var u=g(n[i]);u&&o.push(u)}if(!o.length)return null;var a=g(e);if(!a)return null;var s,c=function(e){return{nearPlumbLineIsBetter:function(t){var n;return(n=t.center.x<e.center.x?e.center.x-t.right:t.left-e.center.x)<0?0:n},nearHorizonIsBetter:function(t){var n;return(n=t.center.y<e.center.y?e.center.y-t.bottom:t.top-e.center.y)<0?0:n},nearTargetLeftIsBetter:function(t){var n;return(n=t.center.x<e.center.x?e.left-t.right:t.left-e.left)<0?0:n},nearTargetTopIsBetter:function(t){var n;return(n=t.center.y<e.center.y?e.top-t.bottom:t.top-e.top)<0?0:n},topIsBetter:function(e){return e.top},bottomIsBetter:function(e){return-1*e.bottom},leftIsBetter:function(e){return e.left},rightIsBetter:function(e){return-1*e.right}}}(a),f=b(o,a,r.straightOverlapThreshold),l=b(f[4],a.center,r.straightOverlapThreshold);switch(t){case"left":s=[{group:l[0].concat(l[3]).concat(l[6]),distance:[c.nearPlumbLineIsBetter,c.topIsBetter]},{group:f[3],distance:[c.nearPlumbLineIsBetter,c.topIsBetter]},{group:f[0].concat(f[6]),distance:[c.nearHorizonIsBetter,c.rightIsBetter,c.nearTargetTopIsBetter]}];break;case"right":s=[{group:l[2].concat(l[5]).concat(l[8]),distance:[c.nearPlumbLineIsBetter,c.topIsBetter]},{group:f[5],distance:[c.nearPlumbLineIsBetter,c.topIsBetter]},{group:f[2].concat(f[8]),distance:[c.nearHorizonIsBetter,c.leftIsBetter,c.nearTargetTopIsBetter]}];break;case"up":s=[{group:l[0].concat(l[1]).concat(l[2]),distance:[c.nearHorizonIsBetter,c.leftIsBetter]},{group:f[1],distance:[c.nearHorizonIsBetter,c.leftIsBetter]},{group:f[0].concat(f[2]),distance:[c.nearPlumbLineIsBetter,c.bottomIsBetter,c.nearTargetLeftIsBetter]}];break;case"down":s=[{group:l[6].concat(l[7]).concat(l[8]),distance:[c.nearHorizonIsBetter,c.leftIsBetter]},{group:f[7],distance:[c.nearHorizonIsBetter,c.leftIsBetter]},{group:f[6].concat(f[8]),distance:[c.nearPlumbLineIsBetter,c.topIsBetter,c.nearTargetLeftIsBetter]}];break;default:return null}r.straightOnly&&s.pop();var d=function(e){for(var t=null,n=0;n<e.length;n++)if(e[n].group.length){t=e[n];break}if(!t)return null;var r=t.distance;return t.group.sort(function(e,t){for(var n=0;n<r.length;n++){var o=r[n],i=o(e)-o(t);if(i)return i}return 0}),t.group}(s);if(!d)return null;var v=null;if(r.rememberSource&&r.previous&&r.previous.destination===e&&r.previous.reverse===t)for(var h=0;h<d.length;h++)if(d[h].element===r.previous.target){v=d[h].element;break}return v||(v=d[0].element),v}function y(e){return"string"==typeof e?[].slice.call(document.querySelectorAll(e)):"object"===(void 0===e?"undefined":t(e))&&e.length?[].slice.call(e):"object"===(void 0===e?"undefined":t(e))&&1===e.nodeType?[e]:[]}function w(e,n){return"string"==typeof n?p.call(e,n):"object"===(void 0===n?"undefined":t(n))&&n.length?n.indexOf(e)>=0:"object"===(void 0===n?"undefined":t(n))&&1===n.nodeType&&e===n}function I(){var e=document.activeElement;if(e&&e!==document.body)return e}function E(e){e=e||{};for(var t=1;t<arguments.length;t++)if(arguments[t])for(var n in arguments[t])arguments[t].hasOwnProperty(n)&&void 0!==arguments[t][n]&&(e[n]=arguments[t][n]);return e}function B(e,t){Array.isArray(t)||(t=[t]);for(var n,r=0;r<t.length;r++)(n=e.indexOf(t[r]))>=0&&e.splice(n,1);return e}function x(e,t,r){if(!e||!t||!f[t]||f[t].disabled)return!1;if(e.offsetWidth<=0&&e.offsetHeight<=0||e.hasAttribute("disabled"))return!1;if(r&&!w(e,f[t].selector))return!1;if("function"==typeof f[t].navigableFilter){if(!1===f[t].navigableFilter(e,t))return!1}else if("function"==typeof n.navigableFilter&&!1===n.navigableFilter(e,t))return!1;return!0}function F(e){for(var t in f)if(!f[t].disabled&&w(e,f[t].selector))return t}function L(e){return y(f[e].selector).filter(function(t){return x(t,e)})}function T(e){var t=f[e].defaultElement;return t?("string"==typeof t&&(t=y(t)[0]),x(t,e,!0)?t:null):null}function k(e){var t=f[e]&&f[e].lastFocusedElement;return x(t,e,!0)?t:null}function P(e,t,n){var r=!(arguments.length>3&&void 0!==arguments[3])||arguments[3];console.log("[fireEvent] type: ",t,", cancelable: ",r);var o=document.createEvent("CustomEvent");return o.initCustomEvent(i+t,!0,r,n),e.dispatchEvent(o)}function S(e,t,n){if(!e)return!1;var r=I(),o=function(){r&&r.blur(),e.focus(),O(e,t)};if(h)return o(),!0;if(h=!0,c)return o(),h=!1,!0;if(r){var i={nextElement:e,nextSectionId:t,direction:n,native:!1};if(!P(r,"willunfocus",i))return h=!1,!1;r.blur(),P(r,"unfocused",i,!1)}var u={previousElement:r,sectionId:t,direction:n,native:!1};return P(e,"willfocus",u)?(e.focus(),P(e,"focused",u,!1),h=!1,O(e,t),!0):(h=!1,!1)}function O(e,t){t||(t=F(e)),t&&(f[t].lastFocusedElement=e,v=t)}function N(e,t){if("@"==e.charAt(0)){return 1==e.length?M():M(e.substr(1))}else{var n=y(e)[0];if(n){var r=F(n);if(x(n,r))return S(n,r,t)}}return!1}function M(e){var t=[],n=function(e){e&&t.indexOf(e)<0&&f[e]&&!f[e].disabled&&t.push(e)};e?n(e):(n(d),n(v),Object.keys(f).map(n));for(var r=0;r<t.length;r++){var o,i=t[r];if(o="last-focused"==f[i].enterTo?k(i)||T(i)||L(i)[0]:T(i)||k(i)||L(i)[0])return S(o,i)}return!1}function j(e,t){P(e,"navigatefailed",{direction:t},!1)}function C(e,t){if(f[e].leaveFor&&void 0!==f[e].leaveFor[t]){var n=f[e].leaveFor[t];if("string"==typeof n)return""===n?null:N(n,t);var r=F(n);if(x(n,r))return S(n,r,t)}return!1}function H(e,t,r){var i=t.getAttribute("data-sn-"+e);if("string"==typeof i)return!(""===i||!N(i,e))||(j(t,e),!1);var u={},a=[];for(var s in f)u[s]=L(s),a=a.concat(u[s]);var c,l=E({},n,f[r]);if("self-only"==l.restrict||"self-first"==l.restrict){var d=u[r];(c=m(t,e,B(d,t),l))||"self-first"!=l.restrict||(c=m(t,e,B(a,d),l))}else c=m(t,e,B(a,t),l);if(c){f[r].previous={target:t,destination:c,reverse:o[e]};var v=F(c);if(r!=v){var h,p=C(r,e);if(p)return!0;if(null===p)return j(t,e),!1;switch(f[v].enterTo){case"last-focused":h=k(v)||T(v);break;case"default-element":h=T(v)}h&&(c=h)}return S(c,v,e)}return!!C(r,e)||(j(t,e),!1)}function A(e){if(!(!l||c||e.altKey||e.ctrlKey||e.metaKey||e.shiftKey)){var t=function(){return e.preventDefault(),e.stopPropagation(),!1},n=I(),o=F(n),i=r[e.keyCode];if(i){if("enter"==i&&n&&o&&!P(n,"enter-down"))return t();if(!n&&(v&&(n=k(v)),!n))return M(),t();if(o)return P(n,"willmove",{direction:i,sectionId:o,cause:"keydown"})&&H(i,n,o),t()}}}function z(e){if(!(e.altKey||e.ctrlKey||e.metaKey||e.shiftKey)&&!c&&l&&"center"==r[e.keyCode]){var t=I();t&&F(t)&&(P(t,"enter-up")||(e.preventDefault(),e.stopPropagation()))}}function D(e){var t=e.target;if(t!==window&&t!==document&&l&&!h){var n=F(t);if(n){if(c)return void O(t,n);var r={sectionId:n,native:!0};P(t,"willfocus",r)?(P(t,"focused",r,!1),O(t,n)):(h=!0,t.blur(),h=!1)}}}function K(e){var t=e.target;if(t!==window&&t!==document&&!c&&l&&!h&&F(t)){var n={native:!0};P(t,"willunfocus",n)?P(t,"unfocused",n,!1):(h=!0,setTimeout(function(){t.focus(),h=!1}))}}var V={init:function(){s||(window.addEventListener("keydown",A),window.addEventListener("keyup",z),window.addEventListener("focus",D,!0),window.addEventListener("blur",K,!0),s=!0)},uninit:function(){window.removeEventListener("blur",K,!0),window.removeEventListener("focus",D,!0),window.removeEventListener("keyup",z),window.removeEventListener("keydown",A),V.clear(),a=0,s=!1},clear:function(){f={},l=0,d="",v="",h=!1},set:function(){var e,r;if("object"===t(arguments[0]))r=arguments[0];else{if("string"!=typeof arguments[0]||"object"!==t(arguments[1]))return;if(e=arguments[0],r=arguments[1],!f[e])throw new Error('Section "'+e+"\" doesn't exist!")}for(var o in r)void 0!==n[o]&&(e?f[e][o]=r[o]:void 0!==r[o]&&(n[o]=r[o]));e&&(f[e]=E({},f[e]))},add:function(){var e,n={};if("object"===t(arguments[0])?n=arguments[0]:"string"==typeof arguments[0]&&"object"===t(arguments[1])&&(e=arguments[0],n=arguments[1]),e||(e="string"==typeof n.id?n.id:function(){for(var e;e=u+String(++a),f[e];);return e}()),f[e])throw new Error('Section "'+e+'" has already existed!');return f[e]={},l++,V.set(e,n),e},remove:function(e){if(!e||"string"!=typeof e)throw new Error('Please assign the "sectionId"!');return!!f[e]&&(f[e]=void 0,f=E({},f),l--,!0)},disable:function(e){return!!f[e]&&(f[e].disabled=!0,!0)},enable:function(e){return!!f[e]&&(f[e].disabled=!1,!0)},pause:function(){c=!0},resume:function(){c=!1},focus:function(e,t){var n=!1;void 0===t&&"boolean"==typeof e&&(t=e,e=void 0);var r=!c&&t;if(r&&V.pause(),e)if("string"==typeof e)n=f[e]?M(e):N(e);else{var o=F(e);x(e,o)&&(n=S(e,o))}else n=M();return r&&V.resume(),n},move:function(e,t){if(e=e.toLowerCase(),!o[e])return!1;var n=t?y(t)[0]:I();if(!n)return!1;var r=F(n);return!!r&&(!!P(n,"willmove",{direction:e,sectionId:r,cause:"api"})&&H(e,n,r))},makeFocusable:function(e){var t=function(e){var t=void 0!==e.tabIndexIgnoreList?e.tabIndexIgnoreList:n.tabIndexIgnoreList;y(e.selector).forEach(function(e){w(e,t)||e.getAttribute("tabindex")||e.setAttribute("tabindex","-1")})};if(e){if(!f[e])throw new Error('Section "'+e+"\" doesn't exist!");t(f[e])}else for(var r in f)t(f[r])},setDefaultSection:function(e){if(e){if(!f[e])throw new Error('Section "'+e+"\" doesn't exist!");d=e}else d=""},getSectionId:F},_=function(){function e(e,t){for(var n=0;n<t.length;n++){var r=t[n];r.enumerable=r.enumerable||!1,r.configurable=!0,"value"in r&&(r.writable=!0),Object.defineProperty(e,r.key,r)}}return function(t,n,r){return n&&e(t.prototype,n),r&&e(t,r),t}}();new(function(){function e(){!function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,e)}return _(e,[{key:"chebyshevDistance",value:function(e,t,n,r,o){var i,u=-r;for(i=0;i<n;i+=1)u=o(u,Math.abs(e[i]-t[i]));return u}},{key:"minkowskiDistance",value:function(e,t,n,r,o){var i,u;if(t!==r)throw"Both vectors should have same dimension";if(isNaN(o))throw'The order "p" must be a number';if(o===Number.POSITIVE_INFINITY)return this.chebyshevDistance(e,n,t,o,Math.max);if(o===Number.NEGATIVE_INFINITY)return this.chebyshevDistance(e,n,t,o,Math.min);if(o<1)throw"Order less than 1 will violate the triangle inequality";for(i=0,u=0;u<t;u+=1)i+=Math.pow(Math.abs(e[u]-n[u]),o);return isNaN(i)?0:Math.pow(i,1/o)}},{key:"calculate",value:function(e,t,n){return this.minkowskiDistance(e,e.length,t,t.length,n)}}]),e}());var q=new function e(){var t=this;!function(e,t){if(!(e instanceof t))throw new TypeError("Cannot call a class as a function")}(this,e),this.init=function(){V.init(),V.focus(),t.bindFocusEvent()},this.destroy=function(){t.focusedPath=null,V.uninit(),t.unbindFocusEvent()},this.bindFocusEvent=function(){t.listening||(t.listening=!0,document.addEventListener("sn:focused",t.handleFocused))},this.unbindFocusEvent=function(){document.removeEventListener("sn:focused",t.handleFocused),t.listening=!1},this.handleFocused=function(e){t.focusedPath!==e.detail.sectionId&&t.setCurrentFocusedPath(e.detail.sectionId)},this.getCurrentFocusedPath=function(){return t.focusedPath},this.setCurrentFocusedPath=function(e){console.log("setCurrentFocusedPath called."),t.focusedPath=e,V.focus(e)},this.addFocusable=function(e,n){var r=n.focusPath,o=n.onEnterPressHandler;if(e&&!V.getSectionId(e)){t.removeFocusable(e,{onEnterPressHandler:o});var i=[{selector:e}];r&&i.unshift(r),e.addEventListener("sn:enter-down",o);var u=V.add.apply(V,i);V.makeFocusable(u)}},this.removeFocusable=function(e,t){var n=t.onEnterPressHandler,r=V.getSectionId(e);r&&(V.remove(r),e.removeEventListener("sn:enter-down",n))},this.destroy()};e.TVNavigation=q,Object.defineProperty(e,"__esModule",{value:!0})});
+(function (global, factory) {
+	typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
+	typeof define === 'function' && define.amd ? define(['exports'], factory) :
+	(factory((global.TVNavigation = {})));
+}(this, (function (exports) { 'use strict';
+
+var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+/**
+ * The Minkowski distance between two points gets generalized
+ * metric distance
+ * when p === 1, this becomes same as Manhattan Distance
+ * when p === 2, this becomes same as Euclidean Distance
+ * when p === Positive or Negative Infinity,
+ *  this becomes chebyshev distance
+ *
+ * @public
+ *
+ * @example
+ * var dist = require('path-to-algorithms/src/others/' +
+ * 'minkowski-distance').minkowskiDistance;
+ * console.log(dist([0, 1], [1, 1], 2)); // 1
+ *
+ * @param {Array} x source point
+ * @param {Array} y target point
+ * @param {Number} p order of Minkowski distance
+ * @returns {Number} distance between two points, if distance
+ * is NaN, then this returns 0
+ */
+var MinkowskiDistance = function () {
+  function MinkowskiDistance() {
+    _classCallCheck(this, MinkowskiDistance);
+  }
+
+  _createClass(MinkowskiDistance, [{
+    key: 'chebyshevDistance',
+    value: function chebyshevDistance(x, y, lx, p, mathfn) {
+      var result = -p;
+      var i;
+      for (i = 0; i < lx; i += 1) {
+        result = mathfn(result, Math.abs(x[i] - y[i]));
+      }
+      return result;
+    }
+  }, {
+    key: 'minkowskiDistance',
+    value: function minkowskiDistance(x, lx, y, ly, p) {
+      var d;
+      var i;
+      if (lx !== ly) {
+        throw 'Both vectors should have same dimension';
+      }
+      if (isNaN(p)) {
+        throw 'The order "p" must be a number';
+      }
+      if (p === Number.POSITIVE_INFINITY) {
+        return this.chebyshevDistance(x, y, lx, p, Math.max);
+      } else if (p === Number.NEGATIVE_INFINITY) {
+        return this.chebyshevDistance(x, y, lx, p, Math.min);
+      } else if (p < 1) {
+        throw 'Order less than 1 will violate the triangle inequality';
+      } else {
+        d = 0;
+        for (i = 0; i < lx; i += 1) {
+          d += Math.pow(Math.abs(x[i] - y[i]), p);
+        }
+        return isNaN(d) ? 0 : Math.pow(d, 1 / p);
+      }
+    }
+  }, {
+    key: 'calculate',
+    value: function calculate(x, y, p) {
+      return this.minkowskiDistance(x, x.length, y, y.length, p);
+    }
+  }]);
+
+  return MinkowskiDistance;
+}();
+
+
+
+var MinkowskiDistance$1 = new MinkowskiDistance();
+
+var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+/*eslint-disable*/
+
+/**
+ * Copyright (c) 2018-present, Raphael Amorim.
+ *
+ * This source code is licensed under the MIT license found in the
+ * LICENSE file in the root directory of this source tree.
+ */
+
+/*
+  Fork from luke-chang/js-spatial-navigation
+ */
+
+var GlobalConfig = {
+  selector: '', // can be a valid <extSelector> except "@" syntax.
+  straightOnly: false,
+  straightOverlapThreshold: 0.35,
+  rememberSource: false,
+  disabled: false,
+  defaultElement: '', // <extSelector> except "@" syntax.
+  enterTo: '', // '', 'last-focused', 'default-element'
+  leaveFor: null, // {left: <extSelector>, right: <extSelector>,
+  //  up: <extSelector>, down: <extSelector>}
+  restrict: 'self-first', // 'self-first', 'self-only', 'none'
+  tabIndexIgnoreList: [],
+  navigableFilter: null
+};
+
+/*********************/
+/* Constant Variable */
+/*********************/
+var KEYMAPPING = {
+  '4': 'left',
+  '21': 'left',
+  '37': 'left',
+  '214': 'left',
+  '205': 'left',
+  '218': 'left',
+  '5': 'right',
+  '22': 'right',
+  '39': 'right',
+  '213': 'right',
+  '206': 'right',
+  '217': 'right',
+  '29460': 'up',
+  '19': 'up',
+  '38': 'up',
+  '211': 'up',
+  '203': 'up',
+  '215': 'up',
+  '29461': 'down',
+  '20': 'down',
+  '40': 'down',
+  '212': 'down',
+  '204': 'down',
+  '216': 'down',
+  '29443': 'enter',
+  '13': 'enter',
+  '67': 'enter',
+  '32': 'enter',
+  '23': 'enter',
+  '195': 'enter'
+};
+
+var REVERSE = {
+  'left': 'right',
+  'up': 'down',
+  'right': 'left',
+  'down': 'up'
+};
+
+var EVENT_PREFIX = 'sn:';
+var ID_POOL_PREFIX = 'section-';
+
+/********************/
+/* Private Variable */
+/********************/
+var _idPool = 0;
+var _ready = false;
+var _pause = false;
+var _sections = {};
+var _sectionCount = 0;
+var _defaultSectionId = '';
+var _lastSectionId = '';
+var _duringFocusChange = false;
+
+/************/
+/* Polyfill */
+/************/
+var elementMatchesSelector = Element.prototype.matches || Element.prototype.matchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector || Element.prototype.oMatchesSelector || function (selector) {
+  var matchedNodes = (this.parentNode || this.document).querySelectorAll(selector);
+  return [].slice.call(matchedNodes).indexOf(this) >= 0;
+};
+
+/*****************/
+/* Core Function */
+/*****************/
+function getRect(elem) {
+  var cr = elem.getBoundingClientRect();
+  var rect = {
+    left: cr.left,
+    top: cr.top,
+    right: cr.right,
+    bottom: cr.bottom,
+    width: cr.width,
+    height: cr.height
+  };
+  rect.element = elem;
+  rect.center = {
+    x: rect.left + Math.floor(rect.width / 2),
+    y: rect.top + Math.floor(rect.height / 2)
+  };
+  rect.center.left = rect.center.right = rect.center.x;
+  rect.center.top = rect.center.bottom = rect.center.y;
+  return rect;
+}
+
+function partition(rects, targetRect, straightOverlapThreshold) {
+  var groups = [[], [], [], [], [], [], [], [], []];
+
+  for (var i = 0; i < rects.length; i++) {
+    var rect = rects[i];
+    var center = rect.center;
+    var x, y, groupId;
+
+    if (center.x < targetRect.left) {
+      x = 0;
+    } else if (center.x <= targetRect.right) {
+      x = 1;
+    } else {
+      x = 2;
+    }
+
+    if (center.y < targetRect.top) {
+      y = 0;
+    } else if (center.y <= targetRect.bottom) {
+      y = 1;
+    } else {
+      y = 2;
+    }
+
+    groupId = y * 3 + x;
+    groups[groupId].push(rect);
+
+    if ([0, 2, 6, 8].indexOf(groupId) !== -1) {
+      var threshold = straightOverlapThreshold;
+
+      if (rect.left <= targetRect.right - targetRect.width * threshold) {
+        if (groupId === 2) {
+          groups[1].push(rect);
+        } else if (groupId === 8) {
+          groups[7].push(rect);
+        }
+      }
+
+      if (rect.right >= targetRect.left + targetRect.width * threshold) {
+        if (groupId === 0) {
+          groups[1].push(rect);
+        } else if (groupId === 6) {
+          groups[7].push(rect);
+        }
+      }
+
+      if (rect.top <= targetRect.bottom - targetRect.height * threshold) {
+        if (groupId === 6) {
+          groups[3].push(rect);
+        } else if (groupId === 8) {
+          groups[5].push(rect);
+        }
+      }
+
+      if (rect.bottom >= targetRect.top + targetRect.height * threshold) {
+        if (groupId === 0) {
+          groups[3].push(rect);
+        } else if (groupId === 2) {
+          groups[5].push(rect);
+        }
+      }
+    }
+  }
+
+  return groups;
+}
+
+function generateDistanceFunction(targetRect) {
+  return {
+    nearPlumbLineIsBetter: function nearPlumbLineIsBetter(rect) {
+      var d;
+      if (rect.center.x < targetRect.center.x) {
+        d = targetRect.center.x - rect.right;
+      } else {
+        d = rect.left - targetRect.center.x;
+      }
+      return d < 0 ? 0 : d;
+    },
+    nearHorizonIsBetter: function nearHorizonIsBetter(rect) {
+      var d;
+      if (rect.center.y < targetRect.center.y) {
+        d = targetRect.center.y - rect.bottom;
+      } else {
+        d = rect.top - targetRect.center.y;
+      }
+      return d < 0 ? 0 : d;
+    },
+    nearTargetLeftIsBetter: function nearTargetLeftIsBetter(rect) {
+      var d;
+      if (rect.center.x < targetRect.center.x) {
+        d = targetRect.left - rect.right;
+      } else {
+        d = rect.left - targetRect.left;
+      }
+      return d < 0 ? 0 : d;
+    },
+    nearTargetTopIsBetter: function nearTargetTopIsBetter(rect) {
+      var d;
+      if (rect.center.y < targetRect.center.y) {
+        d = targetRect.top - rect.bottom;
+      } else {
+        d = rect.top - targetRect.top;
+      }
+      return d < 0 ? 0 : d;
+    },
+    topIsBetter: function topIsBetter(rect) {
+      return rect.top;
+    },
+    bottomIsBetter: function bottomIsBetter(rect) {
+      return -1 * rect.bottom;
+    },
+    leftIsBetter: function leftIsBetter(rect) {
+      return rect.left;
+    },
+    rightIsBetter: function rightIsBetter(rect) {
+      return -1 * rect.right;
+    }
+  };
+}
+
+function prioritize(priorities) {
+  var destPriority = null;
+  for (var i = 0; i < priorities.length; i++) {
+    if (priorities[i].group.length) {
+      destPriority = priorities[i];
+      break;
+    }
+  }
+
+  if (!destPriority) {
+    return null;
+  }
+
+  var destDistance = destPriority.distance;
+
+  destPriority.group.sort(function (a, b) {
+    for (var i = 0; i < destDistance.length; i++) {
+      var distance = destDistance[i];
+      var delta = distance(a) - distance(b);
+
+      if (delta) {
+        return delta;
+      }
+    }
+    return 0;
+  });
+
+  return destPriority.group;
+}
+
+function navigate(target, direction, candidates, config) {
+  if (!target || !direction || !candidates || !candidates.length) {
+    return null;
+  }
+
+  var targetRect = getRect(target);
+  if (!targetRect) {
+    return null;
+  }
+
+  var rects = [];
+  candidates.forEach(function (candidate) {
+    var rect = getRect(candidate);
+    if (rect) {
+      rects.push(rect);
+    }
+  });
+
+  if (!rects.length) {
+    return null;
+  }
+
+  var targetXY = [targetRect.center.x, targetRect.center.y];
+  rects.sort(function (a, b) {
+    var distanceToA = MinkowskiDistance$1.calculate(targetXY, [a.center.x, a.center.y], 2);
+    var distanceToB = MinkowskiDistance$1.calculate(targetXY, [b.center.x, b.center.y], 2);
+    return distanceToA > distanceToB ? 1 : -1;
+  });
+
+  var distanceFunction = generateDistanceFunction(targetRect);
+
+  var groups = partition(rects, targetRect, config.straightOverlapThreshold);
+
+  var internalGroups = partition(groups[4], targetRect.center, config.straightOverlapThreshold);
+
+  var priorities;
+
+  switch (direction) {
+    case 'left':
+      priorities = [{
+        group: internalGroups[0].concat(internalGroups[3]).concat(internalGroups[6]),
+        distance: [distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter]
+      }, {
+        group: groups[3],
+        distance: [distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter]
+      }, {
+        group: groups[0].concat(groups[6]),
+        distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.rightIsBetter, distanceFunction.nearTargetTopIsBetter]
+      }];
+      break;
+    case 'right':
+      priorities = [{
+        group: internalGroups[2].concat(internalGroups[5]).concat(internalGroups[8]),
+        distance: [distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter]
+      }, {
+        group: groups[5],
+        distance: [distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter]
+      }, {
+        group: groups[2].concat(groups[8]),
+        distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter, distanceFunction.nearTargetTopIsBetter]
+      }];
+      break;
+    case 'up':
+      priorities = [{
+        group: internalGroups[0].concat(internalGroups[1]).concat(internalGroups[2]),
+        distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
+      }, {
+        group: groups[1],
+        distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
+      }, {
+        group: groups[0].concat(groups[2]),
+        distance: [distanceFunction.nearPlumbLineIsBetter, distanceFunction.bottomIsBetter, distanceFunction.nearTargetLeftIsBetter]
+      }];
+      break;
+    case 'down':
+      priorities = [{
+        group: internalGroups[6].concat(internalGroups[7]).concat(internalGroups[8]),
+        distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
+      }, {
+        group: groups[7],
+        distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
+      }, {
+        group: groups[6].concat(groups[8]),
+        distance: [distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter, distanceFunction.nearTargetLeftIsBetter]
+      }];
+      break;
+    default:
+      return null;
+  }
+
+  if (config.straightOnly) {
+    priorities.pop();
+  }
+
+  var destGroup = prioritize(priorities);
+  if (!destGroup) {
+    return null;
+  }
+
+  var dest = null;
+  if (config.rememberSource && config.previous && config.previous.destination === target && config.previous.reverse === direction) {
+    for (var j = 0; j < destGroup.length; j++) {
+      if (destGroup[j].element === config.previous.target) {
+        dest = destGroup[j].element;
+        break;
+      }
+    }
+  }
+
+  if (!dest) {
+    dest = destGroup[0].element;
+  }
+
+  console.log('>>> dest ', dest);
+
+  return dest;
+}
+
+/********************/
+/* Private Function */
+/********************/
+function generateId() {
+  var id;
+  while (true) {
+    id = ID_POOL_PREFIX + String(++_idPool);
+    if (!_sections[id]) {
+      break;
+    }
+  }
+  return id;
+}
+
+function parseSelector(selector) {
+  var result;
+  if (typeof selector === 'string') {
+    result = [].slice.call(document.querySelectorAll(selector));
+  } else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.length) {
+    result = [].slice.call(selector);
+  } else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.nodeType === 1) {
+    result = [selector];
+  } else {
+    result = [];
+  }
+  return result;
+}
+
+function matchSelector(elem, selector) {
+  if (typeof selector === 'string') {
+    return elementMatchesSelector.call(elem, selector);
+  } else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.length) {
+    return selector.indexOf(elem) >= 0;
+  } else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.nodeType === 1) {
+    return elem === selector;
+  }
+  return false;
+}
+
+function getCurrentFocusedElement() {
+  var activeElement = document.activeElement;
+  if (activeElement && activeElement !== document.body) {
+    return activeElement;
+  }
+}
+
+function extend(out) {
+  out = out || {};
+  for (var i = 1; i < arguments.length; i++) {
+    if (!arguments[i]) {
+      continue;
+    }
+    for (var key in arguments[i]) {
+      if (arguments[i].hasOwnProperty(key) && arguments[i][key] !== undefined) {
+        out[key] = arguments[i][key];
+      }
+    }
+  }
+  return out;
+}
+
+function exclude(elemList, excludedElem) {
+  if (!Array.isArray(excludedElem)) {
+    excludedElem = [excludedElem];
+  }
+  for (var i = 0, index; i < excludedElem.length; i++) {
+    index = elemList.indexOf(excludedElem[i]);
+    if (index >= 0) {
+      elemList.splice(index, 1);
+    }
+  }
+  return elemList;
+}
+
+function isNavigable(elem, sectionId, verifySectionSelector) {
+  if (!elem || !sectionId || !_sections[sectionId] || _sections[sectionId].disabled) {
+    return false;
+  }
+  if (elem.offsetWidth <= 0 && elem.offsetHeight <= 0 || elem.hasAttribute('disabled')) {
+    return false;
+  }
+  if (verifySectionSelector && !matchSelector(elem, _sections[sectionId].selector)) {
+    return false;
+  }
+  if (typeof _sections[sectionId].navigableFilter === 'function') {
+    if (_sections[sectionId].navigableFilter(elem, sectionId) === false) {
+      return false;
+    }
+  } else if (typeof GlobalConfig.navigableFilter === 'function') {
+    if (GlobalConfig.navigableFilter(elem, sectionId) === false) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function getSectionId(elem) {
+  for (var id in _sections) {
+    if (!_sections[id].disabled && elem && matchSelector(elem, _sections[id].selector)) {
+      return id;
+    }
+  }
+}
+
+function getSectionNavigableElements(sectionId) {
+  return parseSelector(_sections[sectionId].selector).filter(function (elem) {
+    return isNavigable(elem, sectionId);
+  });
+}
+
+function getSectionDefaultElement(sectionId) {
+  var defaultElement = _sections[sectionId].defaultElement;
+  if (!defaultElement) {
+    return null;
+  }
+  if (typeof defaultElement === 'string') {
+    defaultElement = parseSelector(defaultElement)[0];
+  }
+  if (isNavigable(defaultElement, sectionId, true)) {
+    return defaultElement;
+  }
+  return null;
+}
+
+function getSectionLastFocusedElement(sectionId) {
+  var lastFocusedElement = _sections[sectionId] && _sections[sectionId].lastFocusedElement;
+  if (!isNavigable(lastFocusedElement, sectionId, true)) {
+    return null;
+  }
+  return lastFocusedElement;
+}
+
+function fireEvent(elem, type, details) {
+  var cancelable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+
+  var evt = document.createEvent('CustomEvent');
+  evt.initCustomEvent(EVENT_PREFIX + type, true, cancelable, details);
+  return elem.dispatchEvent(evt);
+}
+
+function focusElement(elem, sectionId, direction) {
+  if (!elem) {
+    return false;
+  }
+
+  var currentFocusedElement = getCurrentFocusedElement();
+
+  var silentFocus = function silentFocus() {
+    if (currentFocusedElement) {
+      currentFocusedElement.blur();
+    }
+    elem.focus();
+    focusChanged(elem, sectionId);
+  };
+
+  if (_duringFocusChange) {
+    silentFocus();
+    return true;
+  }
+
+  _duringFocusChange = true;
+
+  if (_pause) {
+    silentFocus();
+    _duringFocusChange = false;
+    return true;
+  }
+
+  if (currentFocusedElement) {
+    var unfocusProperties = {
+      nextElement: elem,
+      nextSectionId: sectionId,
+      direction: direction,
+      native: false
+    };
+    if (!fireEvent(currentFocusedElement, 'willunfocus', unfocusProperties)) {
+      _duringFocusChange = false;
+      return false;
+    }
+    currentFocusedElement.blur();
+    fireEvent(currentFocusedElement, 'unfocused', unfocusProperties, false);
+  }
+
+  var focusProperties = {
+    previousElement: currentFocusedElement,
+    sectionId: sectionId,
+    direction: direction,
+    native: false
+  };
+  if (!fireEvent(elem, 'willfocus', focusProperties)) {
+    _duringFocusChange = false;
+    return false;
+  }
+  elem.focus();
+  fireEvent(elem, 'focused', focusProperties, false);
+
+  _duringFocusChange = false;
+
+  focusChanged(elem, sectionId);
+  return true;
+}
+
+function focusChanged(elem, sectionId) {
+  if (!sectionId) {
+    sectionId = getSectionId(elem);
+  }
+  if (sectionId) {
+    _sections[sectionId].lastFocusedElement = elem;
+    _lastSectionId = sectionId;
+  }
+}
+
+function focusExtendedSelector(selector, direction) {
+  if (selector.charAt(0) == '@') {
+    if (selector.length == 1) {
+      return focusSection();
+    } else {
+      var sectionId = selector.substr(1);
+      return focusSection(sectionId);
+    }
+  } else {
+    var next = parseSelector(selector)[0];
+    if (next) {
+      var nextSectionId = getSectionId(next);
+      if (isNavigable(next, nextSectionId)) {
+        return focusElement(next, nextSectionId, direction);
+      }
+    }
+  }
+  return false;
+}
+
+function focusSection(sectionId) {
+  var range = [];
+  var addRange = function addRange(id) {
+    if (id && range.indexOf(id) < 0 && _sections[id] && !_sections[id].disabled) {
+      range.push(id);
+    }
+  };
+
+  if (sectionId) {
+    addRange(sectionId);
+  } else {
+    addRange(_defaultSectionId);
+    addRange(_lastSectionId);
+    Object.keys(_sections).map(addRange);
+  }
+
+  for (var i = 0; i < range.length; i++) {
+    var id = range[i];
+    var next;
+
+    if (_sections[id].enterTo == 'last-focused') {
+      next = getSectionLastFocusedElement(id) || getSectionDefaultElement(id) || getSectionNavigableElements(id)[0];
+    } else {
+      next = getSectionDefaultElement(id) || getSectionLastFocusedElement(id) || getSectionNavigableElements(id)[0];
+    }
+
+    if (next) {
+      return focusElement(next, id);
+    }
+  }
+
+  return false;
+}
+
+function fireNavigatefailed(elem, direction) {
+  fireEvent(elem, 'navigatefailed', {
+    direction: direction
+  }, false);
+}
+
+function gotoLeaveFor(sectionId, direction) {
+  if (_sections[sectionId].leaveFor && _sections[sectionId].leaveFor[direction] !== undefined) {
+    var next = _sections[sectionId].leaveFor[direction];
+
+    if (typeof next === 'string') {
+      if (next === '') {
+        return null;
+      }
+      return focusExtendedSelector(next, direction);
+    }
+
+    var nextSectionId = getSectionId(next);
+    if (isNavigable(next, nextSectionId)) {
+      return focusElement(next, nextSectionId, direction);
+    }
+  }
+  return false;
+}
+
+function focusNext(direction, currentFocusedElement, currentSectionId) {
+  var extSelector = currentFocusedElement.getAttribute('data-sn-' + direction);
+  if (typeof extSelector === 'string') {
+    if (extSelector === '' || !focusExtendedSelector(extSelector, direction)) {
+      fireNavigatefailed(currentFocusedElement, direction);
+      return false;
+    }
+    return true;
+  }
+
+  var sectionNavigableElements = {};
+  var allNavigableElements = [];
+  for (var id in _sections) {
+    sectionNavigableElements[id] = getSectionNavigableElements(id);
+    allNavigableElements = allNavigableElements.concat(sectionNavigableElements[id]);
+  }
+
+  var config = extend({}, GlobalConfig, _sections[currentSectionId]);
+  var next;
+
+  if (config.restrict == 'self-only' || config.restrict == 'self-first') {
+    var currentSectionNavigableElements = sectionNavigableElements[currentSectionId];
+
+    next = navigate(currentFocusedElement, direction, exclude(currentSectionNavigableElements, currentFocusedElement), config);
+
+    if (!next && config.restrict == 'self-first') {
+      next = navigate(currentFocusedElement, direction, exclude(allNavigableElements, currentSectionNavigableElements), config);
+    }
+  } else {
+    next = navigate(currentFocusedElement, direction, exclude(allNavigableElements, currentFocusedElement), config);
+  }
+
+  if (next) {
+    _sections[currentSectionId].previous = {
+      target: currentFocusedElement,
+      destination: next,
+      reverse: REVERSE[direction]
+    };
+
+    var nextSectionId = getSectionId(next);
+
+    if (currentSectionId != nextSectionId) {
+      var result = gotoLeaveFor(currentSectionId, direction);
+      if (result) {
+        return true;
+      } else if (result === null) {
+        fireNavigatefailed(currentFocusedElement, direction);
+        return false;
+      }
+
+      var enterToElement;
+      switch (_sections[nextSectionId].enterTo) {
+        case 'last-focused':
+          enterToElement = getSectionLastFocusedElement(nextSectionId) || getSectionDefaultElement(nextSectionId);
+          break;
+        case 'default-element':
+          enterToElement = getSectionDefaultElement(nextSectionId);
+          break;
+      }
+      if (enterToElement) {
+        next = enterToElement;
+      }
+    }
+
+    return focusElement(next, nextSectionId, direction);
+  } else if (gotoLeaveFor(currentSectionId, direction)) {
+    return true;
+  }
+
+  fireNavigatefailed(currentFocusedElement, direction);
+  return false;
+}
+
+function onKeyDown(evt) {
+  if (!_sectionCount || _pause || evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey) {
+    return;
+  }
+
+  var preventDefault = function preventDefault() {
+    evt.preventDefault();
+    evt.stopPropagation();
+    return false;
+  };
+
+  var currentFocusedElement = getCurrentFocusedElement();
+  var currentSectionId = getSectionId(currentFocusedElement);
+  var keyMappping = KEYMAPPING[evt.keyCode];
+
+  if (!keyMappping) {
+    return;
+  }
+
+  if (keyMappping == 'enter') {
+    if (currentFocusedElement && currentSectionId) {
+      if (!fireEvent(currentFocusedElement, 'enter-down')) {
+        return preventDefault();
+      }
+    }
+  }
+
+  if (!currentFocusedElement) {
+    if (_lastSectionId) {
+      currentFocusedElement = getSectionLastFocusedElement(_lastSectionId);
+    }
+    if (!currentFocusedElement) {
+      focusSection();
+      return preventDefault();
+    }
+  }
+
+  if (!currentSectionId) {
+    return;
+  }
+
+  var willmoveProperties = {
+    direction: keyMappping,
+    sectionId: currentSectionId,
+    cause: 'keydown'
+  };
+
+  if (fireEvent(currentFocusedElement, 'willmove', willmoveProperties)) {
+    focusNext(keyMappping, currentFocusedElement, currentSectionId);
+  }
+
+  return preventDefault();
+}
+
+function onKeyUp(evt) {
+  if (evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey) {
+    return;
+  }
+
+  if (!_pause && _sectionCount && KEYMAPPING[evt.keyCode] == 'center') {
+    var currentFocusedElement = getCurrentFocusedElement();
+    if (currentFocusedElement && getSectionId(currentFocusedElement)) {
+      if (!fireEvent(currentFocusedElement, 'enter-up')) {
+        evt.preventDefault();
+        evt.stopPropagation();
+      }
+    }
+  }
+}
+
+function onFocus(evt) {
+  var target = evt.target;
+  if (target !== window && target !== document && _sectionCount && !_duringFocusChange) {
+    var sectionId = getSectionId(target);
+    if (sectionId) {
+      if (_pause) {
+        focusChanged(target, sectionId);
+        return;
+      }
+
+      var focusProperties = {
+        sectionId: sectionId,
+        native: true
+      };
+
+      if (!fireEvent(target, 'willfocus', focusProperties)) {
+        _duringFocusChange = true;
+        target.blur();
+        _duringFocusChange = false;
+      } else {
+        fireEvent(target, 'focused', focusProperties, false);
+        focusChanged(target, sectionId);
+      }
+    }
+  }
+}
+
+function onBlur(evt) {
+  var target = evt.target;
+  if (target !== window && target !== document && !_pause && _sectionCount && !_duringFocusChange && getSectionId(target)) {
+    var unfocusProperties = {
+      native: true
+    };
+    if (!fireEvent(target, 'willunfocus', unfocusProperties)) {
+      _duringFocusChange = true;
+      setTimeout(function () {
+        target.focus();
+        _duringFocusChange = false;
+      });
+    } else {
+      fireEvent(target, 'unfocused', unfocusProperties, false);
+    }
+  }
+}
+
+/*******************/
+/* Public Function */
+/*******************/
+var Navigation = {
+  init: function init() {
+    if (!_ready) {
+      window.addEventListener('keydown', onKeyDown);
+      window.addEventListener('keyup', onKeyUp);
+      window.addEventListener('focus', onFocus, true);
+      window.addEventListener('blur', onBlur, true);
+      _ready = true;
+    }
+  },
+
+  uninit: function uninit() {
+    window.removeEventListener('blur', onBlur, true);
+    window.removeEventListener('focus', onFocus, true);
+    window.removeEventListener('keyup', onKeyUp);
+    window.removeEventListener('keydown', onKeyDown);
+    Navigation.clear();
+    _idPool = 0;
+    _ready = false;
+  },
+
+  clear: function clear() {
+    _sections = {};
+    _sectionCount = 0;
+    _defaultSectionId = '';
+    _lastSectionId = '';
+    _duringFocusChange = false;
+  },
+
+  // set(<config>);
+  // set(<sectionId>, <config>);
+  set: function set() {
+    var sectionId, config;
+
+    if (_typeof(arguments[0]) === 'object') {
+      config = arguments[0];
+    } else if (typeof arguments[0] === 'string' && _typeof(arguments[1]) === 'object') {
+      sectionId = arguments[0];
+      config = arguments[1];
+      if (!_sections[sectionId]) {
+        throw new Error('Section "' + sectionId + '" doesn\'t exist!');
+      }
+    } else {
+      return;
+    }
+
+    for (var key in config) {
+      if (GlobalConfig[key] !== undefined) {
+        if (sectionId) {
+          _sections[sectionId][key] = config[key];
+        } else if (config[key] !== undefined) {
+          GlobalConfig[key] = config[key];
+        }
+      }
+    }
+
+    if (sectionId) {
+      // remove "undefined" items
+      _sections[sectionId] = extend({}, _sections[sectionId]);
+    }
+  },
+
+  // add(<config>);
+  // add(<sectionId>, <config>);
+  add: function add() {
+    var sectionId;
+    var config = {};
+
+    if (_typeof(arguments[0]) === 'object') {
+      config = arguments[0];
+    } else if (typeof arguments[0] === 'string' && _typeof(arguments[1]) === 'object') {
+      sectionId = arguments[0];
+      config = arguments[1];
+    }
+
+    if (!sectionId) {
+      sectionId = typeof config.id === 'string' ? config.id : generateId();
+    }
+
+    if (_sections[sectionId]) {
+      throw new Error('Section "' + sectionId + '" has already existed!');
+    }
+
+    _sections[sectionId] = {};
+    _sectionCount++;
+
+    Navigation.set(sectionId, config);
+
+    return sectionId;
+  },
+
+  remove: function remove(sectionId) {
+    if (!sectionId || typeof sectionId !== 'string') {
+      throw new Error('Please assign the "sectionId"!');
+    }
+    if (_sections[sectionId]) {
+      _sections[sectionId] = undefined;
+      _sections = extend({}, _sections);
+      _sectionCount--;
+      return true;
+    }
+    return false;
+  },
+
+  disable: function disable(sectionId) {
+    if (_sections[sectionId]) {
+      _sections[sectionId].disabled = true;
+      return true;
+    }
+    return false;
+  },
+
+  enable: function enable(sectionId) {
+    if (_sections[sectionId]) {
+      _sections[sectionId].disabled = false;
+      return true;
+    }
+    return false;
+  },
+
+  pause: function pause() {
+    _pause = true;
+  },
+
+  resume: function resume() {
+    _pause = false;
+  },
+
+  // focus([silent])
+  // focus(<sectionId>, [silent])
+  // focus(<extSelector>, [silent])
+  // Note: "silent" is optional and default to false
+  focus: function focus(elem, silent) {
+    var result = false;
+
+    if (silent === undefined && typeof elem === 'boolean') {
+      silent = elem;
+      elem = undefined;
+    }
+
+    var autoPause = !_pause && silent;
+
+    if (autoPause) {
+      Navigation.pause();
+    }
+
+    if (!elem) {
+      result = focusSection();
+    } else {
+      if (typeof elem === 'string') {
+        if (_sections[elem]) {
+          result = focusSection(elem);
+        } else {
+          result = focusExtendedSelector(elem);
+        }
+      } else {
+        var nextSectionId = getSectionId(elem);
+        if (isNavigable(elem, nextSectionId)) {
+          result = focusElement(elem, nextSectionId);
+        }
+      }
+    }
+
+    if (autoPause) {
+      Navigation.resume();
+    }
+
+    return result;
+  },
+
+  // move(<direction>)
+  // move(<direction>, <selector>)
+  move: function move(direction, selector) {
+    direction = direction.toLowerCase();
+    if (!REVERSE[direction]) {
+      return false;
+    }
+
+    var elem = selector ? parseSelector(selector)[0] : getCurrentFocusedElement();
+    if (!elem) {
+      return false;
+    }
+
+    var sectionId = getSectionId(elem);
+    if (!sectionId) {
+      return false;
+    }
+
+    var willmoveProperties = {
+      direction: direction,
+      sectionId: sectionId,
+      cause: 'api'
+    };
+
+    if (!fireEvent(elem, 'willmove', willmoveProperties)) {
+      return false;
+    }
+
+    return focusNext(direction, elem, sectionId);
+  },
+
+  // makeFocusable()
+  // makeFocusable(<sectionId>)
+  makeFocusable: function makeFocusable(sectionId) {
+    var doMakeFocusable = function doMakeFocusable(section) {
+      var tabIndexIgnoreList = section.tabIndexIgnoreList !== undefined ? section.tabIndexIgnoreList : GlobalConfig.tabIndexIgnoreList;
+      parseSelector(section.selector).forEach(function (elem) {
+        if (!matchSelector(elem, tabIndexIgnoreList)) {
+          if (!elem.getAttribute('tabindex')) {
+            elem.setAttribute('tabindex', '-1');
+          }
+        }
+      });
+    };
+
+    if (sectionId) {
+      if (_sections[sectionId]) {
+        doMakeFocusable(_sections[sectionId]);
+      } else {
+        throw new Error('Section "' + sectionId + '" doesn\'t exist!');
+      }
+    } else {
+      for (var id in _sections) {
+        doMakeFocusable(_sections[id]);
+      }
+    }
+  },
+
+  setDefaultSection: function setDefaultSection(sectionId) {
+    if (!sectionId) {
+      _defaultSectionId = '';
+    } else if (!_sections[sectionId]) {
+      throw new Error('Section "' + sectionId + '" doesn\'t exist!');
+    } else {
+      _defaultSectionId = sectionId;
+    }
+  },
+
+  getSectionId: getSectionId
+};
+
+
+
+/*eslint-enable*/
+
+function _classCallCheck$1(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+var TVNavigation = function TVNavigation() {
+  var _this = this;
+
+  _classCallCheck$1(this, TVNavigation);
+
+  this.init = function () {
+    Navigation.init();
+    Navigation.focus();
+    _this.bindFocusEvent();
+  };
+
+  this.destroy = function () {
+    _this.focusedPath = null;
+
+    Navigation.uninit();
+    _this.unbindFocusEvent();
+  };
+
+  this.bindFocusEvent = function () {
+    if (!_this.listening) {
+      _this.listening = true;
+      document.addEventListener('sn:focused', _this.handleFocused);
+    }
+  };
+
+  this.unbindFocusEvent = function () {
+    document.removeEventListener('sn:focused', _this.handleFocused);
+    _this.listening = false;
+  };
+
+  this.handleFocused = function (ev) {
+    if (_this.focusedPath !== ev.detail.sectionId) {
+      _this.setCurrentFocusedPath(ev.detail.sectionId);
+    }
+  };
+
+  this.getCurrentFocusedPath = function () {
+    return _this.focusedPath;
+  };
+
+  this.setCurrentFocusedPath = function (focusPath) {
+    _this.focusedPath = focusPath;
+    Navigation.focus(focusPath);
+  };
+
+  this.addEventListener = function (selector, event, fn) {
+    document.querySelectorAll(selector).forEach(function (elem) {
+      return elem.addEventListener(event, fn);
+    });
+    return _this;
+  };
+
+  this.addFocusable = function (config, onEnterPressHandler) {
+    if (!config || Navigation.getSectionId(document.getElementById(config.id))) {
+      return;
+    }
+
+    _this.removeFocusable(config);
+
+    var sectionId = Navigation.add(config);
+
+    if (onEnterPressHandler) {
+      _this.addEventListener(config.selector, 'sn:enter-down', onEnterPressHandler);
+    }
+
+    Navigation.makeFocusable(sectionId);
+  };
+
+  this.removeFocusable = function (config) {
+    var sectionId = Navigation.getSectionId(document.getElementById(config.id));
+    if (!sectionId) {
+      return;
+    }
+
+    Navigation.remove(sectionId);
+    document.querySelectorAll(config.selector).removeEventListener('sn:enter-down');
+  };
+
+  this.destroy();
+};
+
+var tvNavigation = new TVNavigation();
+
+exports.TVNavigation = tvNavigation;
+
+Object.defineProperty(exports, '__esModule', { value: true });
+
+})));
