@@ -1,1 +1,1 @@
-export { default as TVNavigation } from './tv-navigation';
+export { default as TVNavigation } from './tv-navigation'

@@ -19,46 +19,45 @@
  * @returns {Number} distance between two points, if distance
  * is NaN, then this returns 0
  */
-class MinkowskiDistance {
 
-  chebyshevDistance (x, y, lx, p, mathfn) {
-    var result = -p;
-    var i;
-    for (i = 0; i < lx; i += 1) {
-      result = mathfn(result, Math.abs(x[i] - y[i]));
-    }
-    return result;
+class MinkowskiDistance {
+  chebyshevDistance(x, y, lx, p, mathfn) {
+    let result = -p
+    let i
+    for (i = 0; i < lx; i += 1)
+      result = mathfn(result, Math.abs(x[i] - y[i]))
+
+    return result
   }
 
-  minkowskiDistance (x, lx, y, ly, p) {
-    var d;
-    var i;
-    if (lx !== ly) {
-      throw 'Both vectors should have same dimension';
-    }
-    if (isNaN(p)) {
-      throw 'The order "p" must be a number';
-    }
+  minkowskiDistance(x, lx, y, ly, p) {
+    let d, i
+    if (lx !== ly)
+      throw new Error('Both vectors should have same dimension')
+
+    if (isNaN(p))
+      throw new Error('The order "p" must be a number')
+
     if (p === Number.POSITIVE_INFINITY) {
-      return this.chebyshevDistance(x, y, lx, p, Math.max);
+      return this.chebyshevDistance(x, y, lx, p, Math.max)
     } else if (p === Number.NEGATIVE_INFINITY) {
-      return this.chebyshevDistance(x, y, lx, p, Math.min);
+      return this.chebyshevDistance(x, y, lx, p, Math.min)
     } else if (p < 1) {
-      throw 'Order less than 1 will violate the triangle inequality';
+      throw new Error('Order less than 1 will violate the triangle inequality')
     } else {
-      d = 0;
-      for (i = 0; i < lx; i += 1) {
-        d += Math.pow(Math.abs(x[i] - y[i]), p);
-      }
+      d = 0
+      for (i = 0; i < lx; i += 1)
+        d += Math.pow(Math.abs(x[i] - y[i]), p)
+
       return isNaN(d)
         ? 0
-        : Math.pow(d, 1 / p);
+        : Math.pow(d, 1 / p)
     }
   }
 
-  calculate (x, y, p) {
-    return this.minkowskiDistance(x, x.length, y, y.length, p);
+  calculate(x, y, p = 2) {
+    return this.minkowskiDistance(x, x.length, y, y.length, p)
   }
-};
+}
 
-export default new MinkowskiDistance();
+export default new MinkowskiDistance()
