@@ -1,3 +1,1 @@
-module.exports = {
-  testURL: 'http://localhost',
-}
+module.exports = { testURL: 'http://localhost' }
