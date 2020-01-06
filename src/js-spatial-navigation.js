@@ -240,12 +240,15 @@ const prioritize = priorities => {
   if (!destPriority)
     return null
 
+  const destDistance = destPriority.distance
+
   destPriority.group.sort((a, b) => {
-    destPriority.distance.forEach(distance => {
+    for (let i = 0; i < destDistance.length; i++) {
+      const distance = destDistance[i]
       const delta = distance(a) - distance(b)
       if (delta)
         return delta
-    })
+    }
     return 0
   })
 
