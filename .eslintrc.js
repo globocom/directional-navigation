@@ -15,6 +15,7 @@ module.exports = {
     'sourceType': 'module',
     'ecmaVersion': 2018,
   },
+  'parser': 'babel-eslint',
   'rules': {
     // Possible Errors
     'getter-return': ['error', { allowImplicit: true }], // overrides eslint:recommended
