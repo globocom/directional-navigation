@@ -101,8 +101,8 @@ const elementMatchesSelector =
 /**
  * Core Function
  */
-const getRect = elem => {
-  const cr = elem.getBoundingClientRect()
+const getRect = element => {
+  const cr = element.getBoundingClientRect()
   const rect = {
     left: cr.left,
     top: cr.top,
@@ -111,7 +111,7 @@ const getRect = elem => {
     width: cr.width,
     height: cr.height,
   }
-  rect.element = elem
+  rect.element = element
   rect.center = {
     x: rect.left + Math.floor(rect.width / 2),
     y: rect.top + Math.floor(rect.height / 2),
@@ -284,7 +284,7 @@ const navigate = (target, direction, candidates, config) => {
 
   switch (direction) {
   case 'left':
-    rects = rects.filter(elem => elem.center.x < targetRect.center.x)
+    rects = rects.filter(element => element.center.x < targetRect.center.x)
     priorities = [
       {
         // group: internalGroups[0].concat(internalGroups[3])
@@ -314,7 +314,7 @@ const navigate = (target, direction, candidates, config) => {
     ]
     break
   case 'right':
-    rects = rects.filter(elem => elem.center.x > targetRect.center.x)
+    rects = rects.filter(element => element.center.x > targetRect.center.x)
     priorities = [
       {
         // group: internalGroups[2].concat(internalGroups[5])
@@ -344,7 +344,7 @@ const navigate = (target, direction, candidates, config) => {
     ]
     break
   case 'up':
-    rects = rects.filter(elem => elem.center.y < targetRect.center.y)
+    rects = rects.filter(element => element.center.y < targetRect.center.y)
     priorities = [
       {
         // group: internalGroups[0].concat(internalGroups[1])
@@ -374,7 +374,7 @@ const navigate = (target, direction, candidates, config) => {
     ]
     break
   case 'down':
-    rects = rects.filter(elem => elem.center.y > targetRect.center.y)
+    rects = rects.filter(element => element.center.y > targetRect.center.y)
     priorities = [
       {
       //   // group: internalGroups[6].concat(internalGroups[7])
@@ -458,13 +458,13 @@ const parseSelector = selector => {
   return result
 }
 
-const matchSelector = (elem, selector) => {
+const matchSelector = (element, selector) => {
   if (typeof selector === 'string')
-    return elementMatchesSelector.call(elem, selector)
+    return elementMatchesSelector.call(element, selector)
   else if (typeof selector === 'object' && selector.length)
-    return selector.indexOf(elem) >= 0
+    return selector.indexOf(element) >= 0
   else if (typeof selector === 'object' && selector.nodeType === 1)
-    return elem === selector
+    return element === selector
   return false
 }
 
@@ -495,35 +495,33 @@ const exclude = (elemList, excludedElem) => {
   return elemList
 }
 
-const isNavigable = (elem, sectionId, verifySectionSelector) => {
-  if (!elem || !sectionId || !_sections[sectionId] || _sections[sectionId].disabled)
+const isNavigable = (element, sectionId, verifySectionSelector) => {
+  if (!element || !sectionId || !_sections[sectionId] || _sections[sectionId].disabled)
     return false
 
-  if ((elem.offsetWidth <= 0 && elem.offsetHeight <= 0) || elem.hasAttribute('disabled'))
+  if ((element.offsetWidth <= 0 && element.offsetHeight <= 0) || element.hasAttribute('disabled'))
     return false
 
-  if (verifySectionSelector && !matchSelector(elem, _sections[sectionId].selector))
+  if (verifySectionSelector && !matchSelector(element, _sections[sectionId].selector))
     return false
 
   if (typeof _sections[sectionId].navigableFilter === 'function') {
-    if (_sections[sectionId].navigableFilter(elem, sectionId) === false)
+    if (_sections[sectionId].navigableFilter(element, sectionId) === false)
       return false
   } else if (typeof GlobalConfig.navigableFilter === 'function') {
-    if (GlobalConfig.navigableFilter(elem, sectionId) === false)
+    if (GlobalConfig.navigableFilter(element, sectionId) === false)
       return false
   }
   return true
 }
 
-const getSectionId = elem => {
+const getSectionId = element => {
   for (const id in _sections)
-    if (!_sections[id].disabled && elem && matchSelector(elem, _sections[id].selector))
+    if (!_sections[id].disabled && element && matchSelector(element, _sections[id].selector))
       return id
 }
 
-const getSectionNavigableElements = sectionId => {
-  parseSelector(_sections[sectionId].selector).filter(elem => isNavigable(elem, sectionId))
-}
+const getSectionNavigableElements = sectionId => parseSelector(_sections[sectionId].selector).filter(element => isNavigable(element, sectionId))
 
 const getSectionDefaultElement = sectionId => {
   let { defaultElement } = _sections[sectionId]
@@ -547,23 +545,23 @@ const getSectionLastFocusedElement = sectionId => {
   return lastFocusedElement
 }
 
-const fireEvent = (elem, type, details, cancelable = true) => {
+const fireEvent = (element, type, details, cancelable = true) => {
   const evt = document.createEvent('CustomEvent')
   evt.initCustomEvent(EVENT_PREFIX + type, true, cancelable, details)
-  return elem.dispatchEvent(evt)
+  return element.dispatchEvent(evt)
 }
 
-const focusChanged = (elem, sectionId) => {
-  const section = sectionId || getSectionId(elem)
+const focusChanged = (element, sectionId) => {
+  const section = sectionId || getSectionId(element)
 
   if (section) {
-    _sections[section].lastFocusedElement = elem
+    _sections[section].lastFocusedElement = element
     _lastSectionId = section
   }
 }
 
-const focusElement = (elem, sectionId, direction) => {
-  if (!elem)
+const focusElement = (element, sectionId, direction) => {
+  if (!element)
     return false
 
   const currentFocusedElement = getCurrentFocusedElement()
@@ -572,8 +570,8 @@ const focusElement = (elem, sectionId, direction) => {
     if (currentFocusedElement)
       currentFocusedElement.blur()
 
-    elem.focus()
-    focusChanged(elem, sectionId)
+    element.focus()
+    focusChanged(element, sectionId)
   }
 
   if (_duringFocusChange) {
@@ -591,7 +589,7 @@ const focusElement = (elem, sectionId, direction) => {
 
   if (currentFocusedElement) {
     const unfocusProperties = {
-      nextElement: elem,
+      nextElement: element,
       nextSectionId: sectionId,
       direction,
       native: false,
@@ -611,17 +609,17 @@ const focusElement = (elem, sectionId, direction) => {
     native: false,
   }
 
-  if (!fireEvent(elem, 'willfocus', focusProperties)) {
+  if (!fireEvent(element, 'willfocus', focusProperties)) {
     _duringFocusChange = false
     return false
   }
 
-  elem.focus()
-  fireEvent(elem, 'focused', focusProperties, false)
+  element.focus()
+  fireEvent(element, 'focused', focusProperties, false)
 
   _duringFocusChange = false
 
-  focusChanged(elem, sectionId)
+  focusChanged(element, sectionId)
   return true
 }
 
@@ -674,7 +672,7 @@ const focusExtendedSelector = (selector, direction) => {
   return false
 }
 
-const fireNavigateFailed = (elem, direction) => fireEvent(elem, 'navigatefailed', { direction }, false)
+const fireNavigateFailed = (element, direction) => fireEvent(element, 'navigatefailed', { direction }, false)
 
 const gotoLeaveFor = (sectionId, direction) => {
   if (_sections[sectionId].leaveFor && _sections[sectionId].leaveFor[direction] !== undefined) {
@@ -1004,10 +1002,11 @@ const Navigation = {
   // focus(<sectionId>, [silent])
   // focus(<extSelector>, [silent])
   // Note: "silent" is optional and default to false
-  focus: (elem, silent) => {
-    if (silent === undefined && typeof elem === 'boolean') {
-      silent = elem
-      elem = undefined
+  focus: (...args) => {
+    let [element, silent] = args
+    if (typeof element === 'boolean' && silent === undefined) {
+      silent = element
+      element = undefined
     }
 
     const autoPause = !_pause && silent
@@ -1016,20 +1015,18 @@ const Navigation = {
       Navigation.pause()
 
     let result
-    if (elem) {
-      if (typeof elem === 'string') {
-        if (_sections[elem])
-          result = focusSection(elem)
-        else
-          result = focusExtendedSelector(elem)
+    if (element)
+      if (typeof element === 'string') {
+        result = _sections[element]
+          ? focusSection(element)
+          : focusExtendedSelector(element)
       } else {
-        const nextSectionId = getSectionId(elem)
-        if (isNavigable(elem, nextSectionId))
-          result = focusElement(elem, nextSectionId)
+        const nextSectionId = getSectionId(element)
+        if (isNavigable(element, nextSectionId))
+          result = focusElement(element, nextSectionId)
       }
-    } else {
+    else
       result = focusSection()
-    }
 
     if (autoPause)
       Navigation.resume()
@@ -1044,11 +1041,11 @@ const Navigation = {
     if (!REVERSE[direction])
       return false
 
-    const elem = selector ? parseSelector(selector)[0] : getCurrentFocusedElement()
-    if (!elem)
+    const element = selector ? parseSelector(selector)[0] : getCurrentFocusedElement()
+    if (!element)
       return false
 
-    const sectionId = getSectionId(elem)
+    const sectionId = getSectionId(element)
     if (!sectionId)
       return false
 
@@ -1058,10 +1055,10 @@ const Navigation = {
       cause: 'api',
     }
 
-    if (!fireEvent(elem, 'willmove', willmoveProperties))
+    if (!fireEvent(element, 'willmove', willmoveProperties))
       return false
 
-    return focusNext(direction, elem, sectionId)
+    return focusNext(direction, element, sectionId)
   },
 
   // makeFocusable()
@@ -1069,10 +1066,10 @@ const Navigation = {
   makeFocusable: sectionId => {
     const doMakeFocusable = section => {
       const tabIndexIgnoreList = section.tabIndexIgnoreList || GlobalConfig.tabIndexIgnoreList
-      parseSelector(section.selector).forEach(elem => {
-        if (!matchSelector(elem, tabIndexIgnoreList))
-          if (!elem.getAttribute('tabindex'))
-            elem.setAttribute('tabindex', '-1')
+      parseSelector(section.selector).forEach(element => {
+        if (!matchSelector(element, tabIndexIgnoreList))
+          if (!element.getAttribute('tabindex'))
+            element.setAttribute('tabindex', '-1')
       })
     }
 
