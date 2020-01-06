@@ -272,10 +272,6 @@ const navigate = (target, direction, candidates, config) => {
 
   const distanceFunction = generateDistanceFunction(targetRect)
 
-  // const groups = partition(rects, targetRect)
-
-  // const internalGroups = partition(groups[4], targetRect.center)
-
   let priorities
 
   switch (direction) {
@@ -283,30 +279,9 @@ const navigate = (target, direction, candidates, config) => {
     rects = rects.filter(element => element.center.x < targetRect.center.x)
     priorities = [
       {
-        // group: internalGroups[0].concat(internalGroups[3])
-        //                          .concat(internalGroups[6]),
         group: rects,
         distance: [
           distanceFunction.nearestIsBetter,
-          // distanceFunction.nearPlumbLineIsBetter,
-          // distanceFunction.topIsBetter,
-        ],
-      },
-      // {
-      //   group: groups[3],
-      //   distance: [
-      //     distanceFunction.nearPlumbLineIsBetter,
-      //     distanceFunction.topIsBetter
-      //   ]
-      // },
-      {
-        // group: groups[0].concat(groups[6]),
-        group: rects,
-        distance: [
-          distanceFunction.nearestIsBetter,
-          // distanceFunction.nearHorizonIsBetter,
-          // distanceFunction.rightIsBetter,
-          // distanceFunction.nearTargetTopIsBetter,
         ],
       },
     ]
@@ -315,30 +290,9 @@ const navigate = (target, direction, candidates, config) => {
     rects = rects.filter(element => element.center.x > targetRect.center.x)
     priorities = [
       {
-        // group: internalGroups[2].concat(internalGroups[5])
-        //                          .concat(internalGroups[8]),
         group: rects,
         distance: [
           distanceFunction.nearestIsBetter,
-          // distanceFunction.nearPlumbLineIsBetter,
-          // distanceFunction.topIsBetter,
-        ],
-      },
-      // {
-      //   group: groups[5],
-      //   distance: [
-      //     distanceFunction.nearPlumbLineIsBetter,
-      //     distanceFunction.topIsBetter
-      //   ]
-      // },
-      {
-        // group: groups[2].concat(groups[8]),
-        group: rects,
-        distance: [
-          distanceFunction.nearestIsBetter,
-          // distanceFunction.nearHorizonIsBetter,
-          // distanceFunction.leftIsBetter,
-          // distanceFunction.nearTargetTopIsBetter,
         ],
       },
     ]
@@ -347,30 +301,9 @@ const navigate = (target, direction, candidates, config) => {
     rects = rects.filter(element => element.center.y < targetRect.center.y)
     priorities = [
       {
-        // group: internalGroups[0].concat(internalGroups[1])
-        //                          .concat(internalGroups[2]),
         group: rects,
         distance: [
           distanceFunction.nearestIsBetter,
-          // distanceFunction.nearHorizonIsBetter,
-          // distanceFunction.leftIsBetter,
-        ],
-      },
-      // {
-      //   group: groups[1],
-      //   distance: [
-      //     distanceFunction.nearHorizonIsBetter,
-      //     distanceFunction.leftIsBetter
-      //   ]
-      // },
-      {
-        // group: groups[0].concat(groups[2]),
-        group: rects,
-        distance: [
-          distanceFunction.nearestIsBetter,
-          // distanceFunction.nearPlumbLineIsBetter,
-          // distanceFunction.bottomIsBetter,
-          // distanceFunction.nearTargetLeftIsBetter,
         ],
       },
     ]
@@ -379,29 +312,9 @@ const navigate = (target, direction, candidates, config) => {
     rects = rects.filter(element => element.center.y > targetRect.center.y)
     priorities = [
       {
-      //   // group: internalGroups[6].concat(internalGroups[7])
-      //   //                          .concat(internalGroups[8]),
-      //   group: rects,
-      //   distance: [
-      //     distanceFunction.nearHorizonIsBetter,
-      //     distanceFunction.leftIsBetter
-      //   ]
-      // },
-      // {
-      //   group: groups[7],
-      //   distance: [
-      //     distanceFunction.nearHorizonIsBetter,
-      //     distanceFunction.leftIsBetter
-      //   ]
-      // },
-      // {
-        // group: groups[6].concat(groups[8]),
         group: rects,
         distance: [
           distanceFunction.nearestIsBetter,
-          // distanceFunction.nearPlumbLineIsBetter,
-          // distanceFunction.topIsBetter,
-          // distanceFunction.nearTargetLeftIsBetter,
         ],
       },
     ]
