@@ -763,6 +763,29 @@ const focusNext = (direction, currentFocusedElement, currentSectionId) => {
   return false
 }
 
+const onMouseOver = evt => {
+  const { target } = evt
+  if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
+    return
+
+  const element = target.classList.contains('focusable') ? target : target.closest('.focusable')
+
+  focusElement(element, getSectionId(element))
+
+  return preventDefault(evt)
+}
+
+const onMouseDown = evt => {
+  const { target } = evt
+  if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
+    return
+
+  const element = target.classList.contains('focusable') ? target : target.closest('.focusable')
+
+  if (!fireEvent(element, 'enter-down'))
+    return preventDefault(evt)
+}
+
 const onKeyDown = evt => {
   console.log('>>>> onKeyDown ', KEYMAPPING[evt.keyCode])
   if (!_sectionCount || _pause || evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
@@ -882,6 +905,8 @@ const onBlur = evt => {
 const Navigation = {
   init: () => {
     if (!_ready) {
+      window.addEventListener('mouseover', onMouseOver)
+      window.addEventListener('mousedown', onMouseDown)
       window.addEventListener('keydown', onKeyDown)
       window.addEventListener('keyup', onKeyUp)
       window.addEventListener('focus', onFocus, true)
@@ -891,6 +916,8 @@ const Navigation = {
   },
 
   uninit: () => {
+    window.removeEventListener('mouseover', onMouseOver)
+    window.removeEventListener('mousedown', onMouseDown)
     window.removeEventListener('blur', onBlur, true)
     window.removeEventListener('focus', onFocus, true)
     window.removeEventListener('keyup', onKeyUp)
