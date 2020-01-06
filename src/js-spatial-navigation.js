@@ -123,7 +123,7 @@ const getRect = element => {
   return rect
 }
 
-const partition = (rects, targetRect, straightOverlapThreshold) => {
+const partition = (rects, targetRect, straightOverlapThreshold = GlobalConfig.straightOverlapThreshold) => {
   const groups = [[], [], [], [], [], [], [], [], []]
 
   rects.forEach(rect => {
@@ -268,17 +268,9 @@ const navigate = (target, direction, candidates, config) => {
 
   const distanceFunction = generateDistanceFunction(targetRect)
 
-  // var groups = partition(
-  //   rects,
-  //   targetRect,
-  //   config.straightOverlapThreshold
-  // )
+  // const groups = partition(rects, targetRect)
 
-  // var internalGroups = partition(
-  //   groups[4],
-  //   targetRect.center,
-  //   config.straightOverlapThreshold
-  // )
+  // const internalGroups = partition(groups[4], targetRect.center)
 
   let priorities
 
