@@ -1,78 +1,74 @@
-import Navigation from './js-spatial-navigation';
+import Navigation from './js-spatial-navigation'
 
 class TVNavigation {
   constructor() {
-    this.destroy();
+    this.destroy()
   }
 
   init = () => {
-    Navigation.init();
-    Navigation.focus();
-    this.bindFocusEvent();
+    Navigation.init()
+    Navigation.focus()
+    this.bindFocusEvent()
   }
 
   destroy = () => {
-    this.focusedPath = null;
+    this.focusedPath = null
 
-    Navigation.uninit();
-    this.unbindFocusEvent();
+    Navigation.uninit()
+    this.unbindFocusEvent()
   }
 
   bindFocusEvent = () => {
     if (!this.listening) {
-      this.listening = true;
-      document.addEventListener('sn:focused', this.handleFocused);
+      this.listening = true
+      document.addEventListener('sn:focused', this.handleFocused)
     }
   }
 
   unbindFocusEvent = () => {
-    document.removeEventListener('sn:focused', this.handleFocused);
-    this.listening = false;
+    document.removeEventListener('sn:focused', this.handleFocused)
+    this.listening = false
   }
 
-  handleFocused = (ev) => {
-    if (this.focusedPath !== ev.detail.sectionId) {
+  handleFocused = ev => {
+    if (this.focusedPath !== ev.detail.sectionId)
       this.setCurrentFocusedPath(ev.detail.sectionId)
-    }
   }
 
-  getCurrentFocusedPath = () => this.focusedPath;
+  getCurrentFocusedPath = () => this.focusedPath
 
-  setCurrentFocusedPath = (focusPath) => {
-    this.focusedPath = focusPath;
-    Navigation.focus(focusPath);
+  setCurrentFocusedPath = focusPath => {
+    this.focusedPath = focusPath
+    Navigation.focus(focusPath)
   }
 
   addEventListener = (selector, event, fn) => {
-    document.querySelectorAll(selector).forEach((elem) => elem.addEventListener(event, fn))
+    document.querySelectorAll(selector).forEach(elem => elem.addEventListener(event, fn))
     return this
   }
 
   addFocusable = (config, onEnterPressHandler) => {
-    if (!config || Navigation.getSectionId(document.getElementById(config.id))) {
-      return;
-    }
+    if (!config || Navigation.getSectionId(document.getElementById(config.id)))
+      return
 
-    this.removeFocusable(config);
+    this.removeFocusable(config)
 
-    const sectionId = Navigation.add(config);
+    const sectionId = Navigation.add(config)
 
-    if (onEnterPressHandler) {
+    if (onEnterPressHandler)
       this.addEventListener(config.selector, 'sn:enter-down', onEnterPressHandler)
-    }
 
-    Navigation.makeFocusable(sectionId);
+    Navigation.makeFocusable(sectionId)
   }
 
-  removeFocusable = (config) => {
-    const sectionId = Navigation.getSectionId(document.getElementById(config.id));
-    if (!sectionId) {
-      return;
-    }
+  removeFocusable = config => {
+    const sectionId = Navigation.getSectionId(document.getElementById(config.id))
+    if (!sectionId)
+      return
 
-    Navigation.remove(sectionId);
-    document.querySelectorAll(config.selector).removeEventListener('sn:enter-down');
+    Navigation.remove(sectionId)
+    document.querySelectorAll(config.selector).removeEventListener('sn:enter-down')
   }
 }
 
-export default new TVNavigation();
+export default new TVNavigation()
