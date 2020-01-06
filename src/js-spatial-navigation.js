@@ -179,48 +179,53 @@ const partition = (rects, targetRect, straightOverlapThreshold = GlobalConfig.st
   return groups
 }
 
-const generateDistanceFunction = targetRect => ({
-  nearestIsBetter: rect => {
-    const targetXY = [targetRect.center.x, targetRect.center.y]
-    const d = MinkowskiDistance.calculate(targetXY, [rect.center.x, rect.center.y])
-    return d < 0 ? 0 : d
+const generateDistanceFunction = fromRect => ({
+  nearestIsBetter: toRect => {
+    const targetXY = [fromRect.center.x, fromRect.center.y]
+    const d = MinkowskiDistance.calculate(targetXY, [toRect.center.x, toRect.center.y])
+    // console.log('>>>> nearestIsBetter ', toRect.element.id, d)
+    return d
   },
-  nearPlumbLineIsBetter: rect => {
+  nearPlumbLineIsBetter: toRect => {
     let d
-    if (rect.center.x < targetRect.center.x)
-      d = targetRect.center.x - rect.right
+    if (toRect.center.x < fromRect.center.x)
+      d = fromRect.center.x - toRect.right
     else
-      d = rect.left - targetRect.center.x
+      d = toRect.left - fromRect.center.x
+    // console.log('>>>> nearPlumbLineIsBetter ', toRect.element.id, d)
     return d < 0 ? 0 : d
   },
-  nearHorizonIsBetter: rect => {
+  nearHorizonIsBetter: toRect => {
     let d
-    if (rect.center.y < targetRect.center.y)
-      d = targetRect.center.y - rect.bottom
+    if (toRect.center.y < fromRect.center.y)
+      d = fromRect.center.y - toRect.bottom
     else
-      d = rect.top - targetRect.center.y
+      d = toRect.top - fromRect.center.y
+    // console.log('>>>> nearHorizonIsBetter ', toRect.element.id, d)
     return d < 0 ? 0 : d
   },
-  nearTargetLeftIsBetter: rect => {
+  nearTargetLeftIsBetter: toRect => {
     let d
-    if (rect.center.x < targetRect.center.x)
-      d = targetRect.left - rect.right
+    if (toRect.center.x < fromRect.center.x)
+      d = fromRect.left - toRect.right
     else
-      d = rect.left - targetRect.left
+      d = toRect.left - fromRect.left
+    // console.log('>>>> nearTargetLeftIsBetter ', toRect.element.id, d)
     return d < 0 ? 0 : d
   },
-  nearTargetTopIsBetter: rect => {
+  nearTargetTopIsBetter: toRect => {
     let d
-    if (rect.center.y < targetRect.center.y)
-      d = targetRect.top - rect.bottom
+    if (toRect.center.y < fromRect.center.y)
+      d = fromRect.top - toRect.bottom
     else
-      d = rect.top - targetRect.top
+      d = toRect.top - fromRect.top
+    // console.log('>>>> nearTargetTopIsBetter ', toRect.element.id, d)
     return d < 0 ? 0 : d
   },
-  topIsBetter: rect => rect.top,
-  bottomIsBetter: rect => -1 * rect.bottom,
-  leftIsBetter: rect => rect.left,
-  rightIsBetter: rect => -1 * rect.right,
+  topIsBetter: toRect => toRect.top,
+  bottomIsBetter: toRect => -1 * toRect.bottom,
+  leftIsBetter: toRect => toRect.left,
+  rightIsBetter: toRect => -1 * toRect.right,
 })
 
 const prioritize = priorities => {
