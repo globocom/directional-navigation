@@ -225,9 +225,10 @@ const generateDistanceFunction = targetRect => ({
 
 const prioritize = priorities => {
   let destPriority
-  for (const priority in priorities)
-    if (priority.group.length) {
-      destPriority = priority
+
+  for (let i = 0; i < priorities.length; i++)
+    if (priorities[i].group.length) {
+      destPriority = priorities[i]
       break
     }
 
@@ -254,7 +255,7 @@ const navigate = (target, direction, candidates, config) => {
   if (!targetRect)
     return null
 
-  let rects
+  let rects = []
   candidates.forEach(candidate => {
     const rect = getRect(candidate)
     if (rect)
@@ -635,7 +636,8 @@ const focusSection = sectionId => {
     Object.keys(_sections).map(addRange)
   }
 
-  for (const id in range) {
+  for (let i = 0; i < range.length; i++) {
+    const id = range[i]
     let next
 
     if (_sections[id].enterTo === 'last-focused')
@@ -652,19 +654,16 @@ const focusSection = sectionId => {
 
 const focusExtendedSelector = (selector, direction) => {
   if (selector.charAt(0) === '@') {
-    if (selector.length === 1) {
+    if (selector.length === 1)
       return focusSection()
-    } else {
-      const sectionId = selector.substr(1)
-      return focusSection(sectionId)
-    }
-  } else {
-    const [next] = parseSelector(selector)
-    if (next) {
-      const nextSectionId = getSectionId(next)
-      if (isNavigable(next, nextSectionId))
-        return focusElement(next, nextSectionId, direction)
-    }
+    const sectionId = selector.substr(1)
+    return focusSection(sectionId)
+  }
+  const [next] = parseSelector(selector)
+  if (next) {
+    const nextSectionId = getSectionId(next)
+    if (isNavigable(next, nextSectionId))
+      return focusElement(next, nextSectionId, direction)
   }
   return false
 }
@@ -861,20 +860,20 @@ const onFocus = evt => {
         native: true,
       }
 
-      if (!fireEvent(target, 'willfocus', focusProperties)) {
+      const willfocusSuccess = fireEvent(target, 'willfocus', focusProperties)
+      if (willfocusSuccess) {
+        fireEvent(target, 'focused', focusProperties, false)
+        focusChanged(target, sectionId)
+      } else {
         _duringFocusChange = true
         target.blur()
         _duringFocusChange = false
-      } else {
-        fireEvent(target, 'focused', focusProperties, false)
-        focusChanged(target, sectionId)
       }
     }
   }
 }
 
 const onBlur = evt => {
-  console.log('>>>> onBlur ', KEYMAPPING[evt.keyCode])
   const { target } = evt
   if (target !== window
     && target !== document
@@ -883,14 +882,15 @@ const onBlur = evt => {
     && !_duringFocusChange
     && getSectionId(target)) {
     const unfocusProperties = { native: true }
-    if (!fireEvent(target, 'willunfocus', unfocusProperties)) {
+    const willunfocusSuccess = fireEvent(target, 'willunfocus', unfocusProperties)
+    if (willunfocusSuccess) {
+      fireEvent(target, 'unfocused', unfocusProperties, false)
+    } else {
       _duringFocusChange = true
       setTimeout(() => {
         target.focus()
         _duringFocusChange = false
       })
-    } else {
-      fireEvent(target, 'unfocused', unfocusProperties, false)
     }
   }
 }
@@ -952,9 +952,6 @@ const Navigation = {
           _sections[sectionId][key] = config[key]
         else if (config[key] !== undefined)
           GlobalConfig[key] = config[key]
-
-    if (sectionId)
-      _sections[sectionId] = extend({}, _sections[sectionId])
   },
 
   // add(<config>)
@@ -1104,12 +1101,13 @@ const Navigation = {
   },
 
   setDefaultSection: sectionId => {
-    if (!sectionId)
-      _defaultSectionId = ''
-    else if (!_sections[sectionId])
-      throw new Error(`Section ${sectionId} doesn't exist!`)
+    if (sectionId)
+      if (_sections[sectionId])
+        _defaultSectionId = sectionId
+      else
+        throw new Error(`Section ${sectionId} doesn't exist!`)
     else
-      _defaultSectionId = sectionId
+      _defaultSectionId = ''
   },
 
   getSectionId,
