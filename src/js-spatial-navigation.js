@@ -763,6 +763,12 @@ const focusNext = (direction, currentFocusedElement, currentSectionId) => {
   return false
 }
 
+const preventDefault = evt => {
+  evt.preventDefault()
+  evt.stopPropagation()
+  return false
+}
+
 const onMouseOver = evt => {
   const { target } = evt
   if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
@@ -787,15 +793,8 @@ const onMouseDown = evt => {
 }
 
 const onKeyDown = evt => {
-  console.log('>>>> onKeyDown ', KEYMAPPING[evt.keyCode])
   if (!_sectionCount || _pause || evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
     return
-
-  const preventDefault = () => {
-    evt.preventDefault()
-    evt.stopPropagation()
-    return false
-  }
 
   let currentFocusedElement = getCurrentFocusedElement()
   const currentSectionId = getSectionId(currentFocusedElement)
@@ -807,7 +806,7 @@ const onKeyDown = evt => {
   if (keyMappping === 'enter')
     if (currentFocusedElement && currentSectionId)
       if (!fireEvent(currentFocusedElement, 'enter-down'))
-        return preventDefault()
+        return preventDefault(evt)
 
   if (!currentFocusedElement) {
     if (_lastSectionId)
@@ -815,7 +814,7 @@ const onKeyDown = evt => {
 
     if (!currentFocusedElement) {
       focusSection()
-      return preventDefault()
+      return preventDefault(evt)
     }
   }
 
@@ -831,11 +830,10 @@ const onKeyDown = evt => {
   if (fireEvent(currentFocusedElement, 'willmove', willmoveProperties))
     focusNext(keyMappping, currentFocusedElement, currentSectionId)
 
-  return preventDefault()
+  return preventDefault(evt)
 }
 
 const onKeyUp = evt => {
-  console.log('>>>> onKeyUp ', KEYMAPPING[evt.keyCode])
   if (evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
     return
 
@@ -843,14 +841,12 @@ const onKeyUp = evt => {
     const currentFocusedElement = getCurrentFocusedElement()
     if (currentFocusedElement && getSectionId(currentFocusedElement))
       if (!fireEvent(currentFocusedElement, 'enter-up')) {
-        evt.preventDefault()
-        evt.stopPropagation()
+        preventDefault(evt)
       }
   }
 }
 
 const onFocus = evt => {
-  console.log('>>>> onFocus ', KEYMAPPING[evt.keyCode])
   const { target } = evt
   if (target !== window && target !== document && _sectionCount && !_duringFocusChange) {
     const sectionId = getSectionId(target)
