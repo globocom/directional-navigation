@@ -281,7 +281,9 @@ const navigate = (target, direction, candidates, config) => {
       {
         group: rects,
         distance: [
+          distanceFunction.nearHorizonIsBetter,
           distanceFunction.nearestIsBetter,
+          distanceFunction.topIsBetter,
         ],
       },
     ]
@@ -292,7 +294,9 @@ const navigate = (target, direction, candidates, config) => {
       {
         group: rects,
         distance: [
+          distanceFunction.nearHorizonIsBetter,
           distanceFunction.nearestIsBetter,
+          distanceFunction.topIsBetter,
         ],
       },
     ]
@@ -304,6 +308,8 @@ const navigate = (target, direction, candidates, config) => {
         group: rects,
         distance: [
           distanceFunction.nearestIsBetter,
+          distanceFunction.nearHorizonIsBetter,
+          distanceFunction.leftIsBetter,
         ],
       },
     ]
@@ -315,6 +321,9 @@ const navigate = (target, direction, candidates, config) => {
         group: rects,
         distance: [
           distanceFunction.nearestIsBetter,
+          distanceFunction.nearPlumbLineIsBetter,
+          distanceFunction.topIsBetter,
+          distanceFunction.nearTargetLeftIsBetter,
         ],
       },
     ]
