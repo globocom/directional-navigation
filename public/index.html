@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>TVNavigation Demo Page</title>
+
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.4.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="stylesheets/style.css">
+
+    <script type="text/javascript" charset="utf-8" src="tv-navigation.js"></script>
+  </head>
+  <body>
+    <div id="main-container" class="container">
+      <div id="middlebox">
+        <div class="icon focusable click-add" id="click-add"><i class="fa fa-firefox"></i></div>
+        <div class="icon focusable" id="chrome"><i class="fa fa-chrome"></i></div>
+        <div class="icon focusable" id="opera"><i class="fa fa-opera"></i></div>
+        <div class="icon focusable" id="internet-explorer"><i class="fa fa-internet-explorer"></i></div>
+        <div class="icon focusable" id="apple"><i class="fa fa-apple"></i></div> 
+      </div>
+    </div>
+    <!-- <script async src="http://weinre.gcloud.globoi.com/target/target-script-min.js#vitor"></script> -->
+
+    <!-- <script type="text/javascript" charset="utf-8" src="j/main.js"></script> -->
+
+    <script>
+    const navigation = TVNavigation
+
+    // Initialize
+    navigation.init()
+
+    // Add the second section "middlebox".
+    navigation.addFocusable({
+    id: 'middlebox',
+    selector: '#middlebox .focusable',
+
+    // Focus the last focused element first then entering this section.
+    enterTo: '',
+    })
+
+    navigation.addEventListener('#middlebox .focusable', 'sn:enter-down', evt => evt.target.classList.add('active'))
+
+    // Focus section "middlebox" by default.
+    navigation.setCurrentFocusedPath('middlebox')
+    </script>
+  </body>
+</html>
