@@ -1,39 +1,24 @@
-import resolve from 'rollup-plugin-node-resolve'
-import commonjs from 'rollup-plugin-commonjs'
-import babel from 'rollup-plugin-babel'
-import flow from 'rollup-plugin-flow'
-import uglify from 'rollup-plugin-uglify'
 
-export default {
-  input: 'src/index.js',
-  output: [
-    {
-      file: 'dist/bundle.umd.js',
-      format: 'umd',
-      name: 'TVNavigation',
-    },
+const { terser } = require('rollup-plugin-terser')
+
+const { baseConfig } = require('./rollup.config.base')
+
+const output = [
+  ...baseConfig.output,
+  ...[
     {
       file: 'dist/tv-navigation.min.js',
       format: 'umd',
       name: 'TVNavigation',
-    },
-    {
-      file: 'dist/tv-navigation.esm.js',
-      format: 'es',
+      plugins: [terser({ include: [/^.+\.min\.js$/] })],
     },
   ],
-  plugins: [
-    flow(),
-    babel({
-      exclude: 'node_modules/**',
-      externalHelpers: false,
-    }),
-    commonjs(),
-    resolve({
-      jsnext: true,
-      main: true,
-      browser: true,
-    }),
-    uglify(),
-  ],
+]
+
+const plugins = [...baseConfig.plugins]
+
+module.exports = {
+  ...baseConfig,
+  output,
+  plugins,
 }
