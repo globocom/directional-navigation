@@ -1,6 +1,6 @@
 import Navigation from './js-spatial-navigation'
 
-export default class TVNavigation {
+class TVNavigation {
   constructor() {
     this.destroy()
   }
@@ -70,3 +70,5 @@ export default class TVNavigation {
     document.querySelectorAll(config.selector).removeEventListener('sn:enter-down')
   }
 }
+
+export default new TVNavigation()
