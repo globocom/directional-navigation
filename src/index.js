@@ -1,1 +1,3 @@
-export { default as TVNavigation } from './tv-navigation'
+import TVNavigation from './tv-navigation'
+
+export default new TVNavigation()
