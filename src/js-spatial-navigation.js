@@ -123,62 +123,6 @@ const getRect = element => {
   return rect
 }
 
-const partition = (rects, targetRect, straightOverlapThreshold = GlobalConfig.straightOverlapThreshold) => {
-  const groups = [[], [], [], [], [], [], [], [], []]
-
-  rects.forEach(rect => {
-    const { center } = rect
-    let x, y
-
-    if (center.x < targetRect.left)
-      x = 0
-    else if (center.x <= targetRect.right)
-      x = 1
-    else
-      x = 2
-
-    if (center.y < targetRect.top)
-      y = 0
-    else if (center.y <= targetRect.bottom)
-      y = 1
-    else
-      y = 2
-
-    const groupId = y * 3 + x
-    groups[groupId].push(rect)
-
-    if ([0, 2, 6, 8].indexOf(groupId) !== -1) {
-      const threshold = straightOverlapThreshold
-
-      if (rect.left <= targetRect.right - targetRect.width * threshold)
-        if (groupId === 2)
-          groups[1].push(rect)
-        else if (groupId === 8)
-          groups[7].push(rect)
-
-      if (rect.right >= targetRect.left + targetRect.width * threshold)
-        if (groupId === 0)
-          groups[1].push(rect)
-        else if (groupId === 6)
-          groups[7].push(rect)
-
-      if (rect.top <= targetRect.bottom - targetRect.height * threshold)
-        if (groupId === 6)
-          groups[3].push(rect)
-        else if (groupId === 8)
-          groups[5].push(rect)
-
-      if (rect.bottom >= targetRect.top + targetRect.height * threshold)
-        if (groupId === 0)
-          groups[3].push(rect)
-        else if (groupId === 2)
-          groups[5].push(rect)
-    }
-  })
-
-  return groups
-}
-
 const generateDistanceFunction = fromRect => ({
   nearestIsBetter: toRect => {
     const targetXY = [fromRect.center.x, fromRect.center.y]
