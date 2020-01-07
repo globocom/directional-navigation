@@ -1,3 +1,3 @@
 import TVNavigation from './tv-navigation'
 
-export default new TVNavigation()
+export default { TVNavigation }
