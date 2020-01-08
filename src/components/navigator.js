@@ -10,7 +10,15 @@
  */
 
 import EventsManager from './events'
-import MinkowskiDistance from '../aux/minkowski-distance'
+import { getRect, generateDistanceFunction, prioritize } from './core-functions'
+import { getKeyMapping } from '../misc/key-mapping'
+import {
+  exclude,
+  getReverse,
+  matchSelector,
+  parseSelector,
+  preventDefault,
+} from '../misc/utils'
 
 const defaultConfig = {
   selector: '',
@@ -40,40 +48,52 @@ export default class Navigator {
     this._defaultSectionId = ''
     this._lastSectionId = ''
     this._duringFocusChange = false
+    this._focusedPath = null
+    this._eventsManager = new EventsManager(this._config.eventPrefix)
   }
 
   init = () => {
     if (!this._ready) {
-      EventsManager.addListener(window, 'mouseover', onMouseOver)
-      window.addEventListener('mouseover', onMouseOver)
-      window.addEventListener('mousedown', onMouseDown)
-      window.addEventListener('keydown', onKeyDown)
-      window.addEventListener('keyup', onKeyUp)
-      window.addEventListener('focus', onFocus, true)
-      window.addEventListener('blur', onBlur, true)
+      this.bindEvents()
       this._ready = true
     }
+    this.focus()
   }
 
   destroy = () => {
-    // EventsManager.removeListener(window, 'mouseover', onMouseOver)
-    window.removeEventListener('mouseover', onMouseOver)
-    window.removeEventListener('mousedown', onMouseDown)
-    window.removeEventListener('blur', onBlur, true)
-    window.removeEventListener('focus', onFocus, true)
-    window.removeEventListener('keyup', onKeyUp)
-    window.removeEventListener('keydown', onKeyDown)
     this.clear()
-    this._idPool = 0
-    this._ready = false
+    this.unbindEvents()
   }
 
   clear = () => {
+    this._ready = false
     this._sections = {}
     this._sectionCount = 0
+    this._idPool = 0
     this._defaultSectionId = ''
     this._lastSectionId = ''
     this._duringFocusChange = false
+    this._focusedPath = null
+  }
+
+  bindEvents = () => {
+    this._eventsManager.addListener(window, 'mouseover', this._onMouseOver)
+    this._eventsManager.addListener(window, 'mousedown', this._onMouseDown)
+    this._eventsManager.addListener(window, 'keydown', this._onKeyDown)
+    this._eventsManager.addListener(window, 'keyup', this._onKeyUp)
+    this._eventsManager.addListener(window, 'focus', this._onFocus, true)
+    this._eventsManager.addListener(window, 'blur', this._onBlur, true)
+    this._eventsManager.addListener(document, `${this._config.eventPrefix}focused`, this._handleFocused)
+  }
+
+  unbindEvents = () => {
+    this._eventsManager.removeListener(window, 'mouseover', this._onMouseOver)
+    this._eventsManager.removeListener(window, 'mousedown', this._onMouseDown)
+    this._eventsManager.removeListener(window, 'keydown', this._onKeyDown)
+    this._eventsManager.removeListener(window, 'keyup', this._onKeyUp)
+    this._eventsManager.removeListener(window, 'focus', this._onFocus, true)
+    this._eventsManager.removeListener(window, 'blur', this._onBlur, true)
+    this._eventsManager.removeListener(document, `${this._config.eventPrefix}focused`, this._handleFocused)
   }
 
   // set(<config>)
@@ -92,11 +112,11 @@ export default class Navigator {
     }
 
     for (const key in config)
-      if (GlobalConfig[key] !== undefined)
+      if (this._config[key] !== undefined)
         if (sectionId)
           this._sections[sectionId][key] = config[key]
         else if (config[key] !== undefined)
-          GlobalConfig[key] = config[key]
+          this._config[key] = config[key]
   }
 
   // add(<config>)
@@ -110,7 +130,7 @@ export default class Navigator {
       [sectionId, config] = args
 
     if (!sectionId)
-      sectionId = typeof config.id === 'string' ? config.id : generateId()
+      sectionId = typeof config.id === 'string' ? config.id : this._generateId()
 
     if (this._sections[sectionId])
       throw new Error(`Section ${sectionId} has already existed!`)
@@ -118,7 +138,7 @@ export default class Navigator {
     this._sections[sectionId] = {}
     this._sectionCount++
 
-    Navigation.set(sectionId, config)
+    this.set(sectionId, config)
 
     return sectionId
   }
@@ -129,7 +149,7 @@ export default class Navigator {
 
     if (this._sections[sectionId]) {
       this._sections[sectionId] = undefined
-      this._sections = extend({}, this._sections)
+      this._sections = { ...this._sections }
       this._sectionCount--
       return true
     }
@@ -174,24 +194,24 @@ export default class Navigator {
     const autoPause = !this._pause && silent
 
     if (autoPause)
-      Navigation.pause()
+      this.pause()
 
     let result
     if (element)
       if (typeof element === 'string') {
         result = this._sections[element]
-          ? focusSection(element)
-          : focusExtendedSelector(element)
+          ? this._focusSection(element)
+          : this._focusExtendedSelector(element)
       } else {
-        const nextSectionId = getSectionId(element)
-        if (isNavigable(element, nextSectionId))
-          result = focusElement(element, nextSectionId)
+        const nextSectionId = this._getSectionId(element)
+        if (this._isNavigable(element, nextSectionId))
+          result = this._focusElement(element, nextSectionId)
       }
     else
-      result = focusSection()
+      result = this._focusSection()
 
     if (autoPause)
-      Navigation.resume()
+      this.resume()
 
     return result
   }
@@ -200,14 +220,14 @@ export default class Navigator {
   // move(<direction>, <selector>)
   move = (dir, selector) => {
     const direction = dir.toLowerCase()
-    if (!REVERSE[direction])
+    if (!getReverse(direction))
       return false
 
-    const element = selector ? parseSelector(selector)[0] : getCurrentFocusedElement()
+    const element = selector ? parseSelector(selector)[0] : this._getCurrentFocusedElement()
     if (!element)
       return false
 
-    const sectionId = getSectionId(element)
+    const sectionId = this._getSectionId(element)
     if (!sectionId)
       return false
 
@@ -217,17 +237,60 @@ export default class Navigator {
       cause: 'api',
     }
 
-    if (!fireEvent(element, 'willmove', willmoveProperties))
+    if (!this._eventsManager.fireEvent(element, 'willmove', willmoveProperties))
       return false
 
-    return focusNext(direction, element, sectionId)
+    return this._focusNext(direction, element, sectionId)
   }
 
-  // makeFocusable()
-  // makeFocusable(<sectionId>)
-  makeFocusable = sectionId => {
+  addFocusable = (config, onEnterPressHandler) => {
+    if (!config || this._getSectionId(document.getElementById(config.id)))
+      return
+
+    this.removeFocusable(config)
+
+    const sectionId = this.add(config)
+
+    if (onEnterPressHandler)
+      this._eventsManager.addListener(config.selector, `${this._config.eventPrefix}enter-down`, onEnterPressHandler)
+
+    this._makeFocusable(sectionId)
+  }
+
+  removeFocusable = (config, onEnterPressHandler) => {
+    const sectionId = this._getSectionId(document.getElementById(config.id))
+    if (!sectionId)
+      return
+
+    this.remove(sectionId)
+    if (onEnterPressHandler)
+      this._eventsManager.removeListener(`${this._config.eventPrefix}enter-down`, onEnterPressHandler)
+  }
+
+  setDefaultSection = sectionId => {
+    if (sectionId)
+      if (this._sections[sectionId])
+        this._defaultSectionId = sectionId
+      else
+        throw new Error(`Section ${sectionId} doesn't exist!`)
+    else
+      this._defaultSectionId = ''
+  }
+
+  getCurrentFocusedPath = () => this._focusedPath
+
+  setCurrentFocusedPath = focusPath => {
+    this._focusedPath = focusPath
+    this.focus(focusPath)
+  }
+
+  /**
+   * Private methods
+   */
+
+  _makeFocusable = sectionId => {
     const doMakeFocusable = section => {
-      const tabIndexIgnoreList = section.tabIndexIgnoreList || GlobalConfig.tabIndexIgnoreList
+      const tabIndexIgnoreList = section.tabIndexIgnoreList || this._config.tabIndexIgnoreList
       parseSelector(section.selector).forEach(element => {
         if (!matchSelector(element, tabIndexIgnoreList))
           if (!element.getAttribute('tabindex'))
@@ -245,214 +308,29 @@ export default class Navigator {
         doMakeFocusable(this._sections[id])
   }
 
-  setDefaultSection = sectionId => {
-    if (sectionId)
-      if (this._sections[sectionId])
-        this._defaultSectionId = sectionId
-      else
-        throw new Error(`Section ${sectionId} doesn't exist!`)
-    else
-      this._defaultSectionId = ''
-  }
-}
+  _navigate = (target, direction, candidates, config) => {
+    if (!target || !direction || !candidates || !candidates.length)
+      return null
 
-/**
- * Constant Variable
- */
-const KEYMAPPING = {
-  4: 'left',
-  21: 'left',
-  37: 'left',
-  214: 'left',
-  205: 'left',
-  218: 'left',
-  5: 'right',
-  22: 'right',
-  39: 'right',
-  213: 'right',
-  206: 'right',
-  217: 'right',
-  29460: 'up',
-  19: 'up',
-  38: 'up',
-  211: 'up',
-  203: 'up',
-  215: 'up',
-  29461: 'down',
-  20: 'down',
-  40: 'down',
-  212: 'down',
-  204: 'down',
-  216: 'down',
-  29443: 'enter',
-  13: 'enter',
-  67: 'enter',
-  32: 'enter',
-  23: 'enter',
-  195: 'enter',
-}
+    const targetRect = getRect(target)
+    if (!targetRect)
+      return null
 
-const REVERSE = {
-  left: 'right',
-  up: 'down',
-  right: 'left',
-  down: 'up',
-}
+    let rects = []
+    candidates.forEach(candidate => {
+      const rect = getRect(candidate)
+      if (rect)
+        rects.push(rect)
+    })
 
-const EVENT_PREFIX = 'sn:'
-const ID_POOL_PREFIX = 'section-'
+    if (!rects.length)
+      return null
 
-/**
- * Private Variable
- */
-let _idPool = 0
-let _ready = false
-let _pause = false
-let _sections = {}
-let _sectionCount = 0
-let _defaultSectionId = ''
-let _lastSectionId = ''
-let _duringFocusChange = false
+    const distanceFunction = generateDistanceFunction(targetRect)
 
-/**
- * Polyfill
- */
-const elementMatchesSelector =
-  Element.prototype.matches
-  || Element.prototype.matchesSelector
-  || Element.prototype.mozMatchesSelector
-  || Element.prototype.webkitMatchesSelector
-  || Element.prototype.msMatchesSelector
-  || Element.prototype.oMatchesSelector
-  || function (selector) {
-    const matchedNodes = (this.parentNode || this.document).querySelectorAll(selector)
-    return [].slice.call(matchedNodes).indexOf(this) >= 0
-  }
+    let priorities
 
-/**
- * Core Function
- */
-const getRect = element => {
-  const cr = element.getBoundingClientRect()
-  const rect = {
-    left: cr.left,
-    top: cr.top,
-    right: cr.right,
-    bottom: cr.bottom,
-    width: cr.width,
-    height: cr.height,
-  }
-  rect.element = element
-  rect.center = {
-    x: rect.left + Math.floor(rect.width / 2),
-    y: rect.top + Math.floor(rect.height / 2),
-  }
-  rect.center.left = rect.center.x
-  rect.center.right = rect.center.x
-  rect.center.top = rect.center.y
-  rect.center.bottom = rect.center.y
-  return rect
-}
-
-const generateDistanceFunction = fromRect => ({
-  nearestIsBetter: toRect => {
-    const targetXY = [fromRect.center.x, fromRect.center.y]
-    const d = MinkowskiDistance.calculate(targetXY, [toRect.center.x, toRect.center.y])
-    // console.log('>>>> nearestIsBetter ', toRect.element.id, d)
-    return d
-  },
-  nearPlumbLineIsBetter: toRect => {
-    let d
-    if (toRect.center.x < fromRect.center.x)
-      d = fromRect.center.x - toRect.right
-    else
-      d = toRect.left - fromRect.center.x
-    // console.log('>>>> nearPlumbLineIsBetter ', toRect.element.id, d)
-    return d < 0 ? 0 : d
-  },
-  nearHorizonIsBetter: toRect => {
-    let d
-    if (toRect.center.y < fromRect.center.y)
-      d = fromRect.center.y - toRect.bottom
-    else
-      d = toRect.top - fromRect.center.y
-    // console.log('>>>> nearHorizonIsBetter ', toRect.element.id, d)
-    return d < 0 ? 0 : d
-  },
-  nearTargetLeftIsBetter: toRect => {
-    let d
-    if (toRect.center.x < fromRect.center.x)
-      d = fromRect.left - toRect.right
-    else
-      d = toRect.left - fromRect.left
-    // console.log('>>>> nearTargetLeftIsBetter ', toRect.element.id, d)
-    return d < 0 ? 0 : d
-  },
-  nearTargetTopIsBetter: toRect => {
-    let d
-    if (toRect.center.y < fromRect.center.y)
-      d = fromRect.top - toRect.bottom
-    else
-      d = toRect.top - fromRect.top
-    // console.log('>>>> nearTargetTopIsBetter ', toRect.element.id, d)
-    return d < 0 ? 0 : d
-  },
-  topIsBetter: toRect => toRect.top,
-  bottomIsBetter: toRect => -1 * toRect.bottom,
-  leftIsBetter: toRect => toRect.left,
-  rightIsBetter: toRect => -1 * toRect.right,
-})
-
-const prioritize = priorities => {
-  let destPriority
-
-  for (let i = 0; i < priorities.length; i++)
-    if (priorities[i].group.length) {
-      destPriority = priorities[i]
-      break
-    }
-
-  if (!destPriority)
-    return null
-
-  const destDistance = destPriority.distance
-
-  destPriority.group.sort((a, b) => {
-    for (let i = 0; i < destDistance.length; i++) {
-      const distance = destDistance[i]
-      const delta = distance(a) - distance(b)
-      if (delta)
-        return delta
-    }
-    return 0
-  })
-
-  return destPriority.group
-}
-
-const navigate = (target, direction, candidates, config) => {
-  if (!target || !direction || !candidates || !candidates.length)
-    return null
-
-  const targetRect = getRect(target)
-  if (!targetRect)
-    return null
-
-  let rects = []
-  candidates.forEach(candidate => {
-    const rect = getRect(candidate)
-    if (rect)
-      rects.push(rect)
-  })
-
-  if (!rects.length)
-    return null
-
-  const distanceFunction = generateDistanceFunction(targetRect)
-
-  let priorities
-
-  switch (direction) {
+    switch (direction) {
     case 'left':
       rects = rects.filter(element => element.center.x < targetRect.center.x)
       priorities = [
@@ -508,501 +386,451 @@ const navigate = (target, direction, candidates, config) => {
       break
     default:
       return null
+    }
+
+    if (config.straightOnly)
+      priorities.pop()
+
+    const destGroup = prioritize(priorities)
+    if (!destGroup)
+      return null
+
+    let dest
+    if (config.rememberSource
+      && config.previous
+      && config.previous.destination === target
+      && config.previous.reverse === direction)
+      for (const destination in destGroup)
+        if (destination.element === config.previous.target) {
+          dest = destination.element
+          break
+        }
+
+    if (!dest)
+      dest = destGroup[0].element
+
+    return dest
   }
 
-  if (config.straightOnly)
-    priorities.pop()
+  _isNavigable = (element, sectionId, verifySectionSelector) => {
+    if (!element || !sectionId || !this._sections[sectionId] || this._sections[sectionId].disabled)
+      return false
 
-  const destGroup = prioritize(priorities)
-  if (!destGroup)
-    return null
+    if ((element.offsetWidth <= 0 && element.offsetHeight <= 0) || element.hasAttribute('disabled'))
+      return false
 
-  let dest
-  if (config.rememberSource
-    && config.previous
-    && config.previous.destination === target
-    && config.previous.reverse === direction)
-    for (const destination in destGroup)
-      if (destination.element === config.previous.target) {
-        dest = destination.element
-        break
+    if (verifySectionSelector && !matchSelector(element, this._sections[sectionId].selector))
+      return false
+
+    if (typeof this._sections[sectionId].navigableFilter === 'function') {
+      if (this._sections[sectionId].navigableFilter(element, sectionId) === false)
+        return false
+    } else if (typeof this._config.navigableFilter === 'function') {
+      if (this._config.navigableFilter(element, sectionId) === false)
+        return false
+    }
+    return true
+  }
+
+  _focusNext = (direction, currentFocusedElement, currentSectionId) => {
+    const extSelector = currentFocusedElement.getAttribute(`data-sn-${direction}`)
+    if (typeof extSelector === 'string') {
+      if (extSelector === ''
+        || !this._focusExtendedSelector(extSelector, direction)) {
+        this._fireNavigateFailed(currentFocusedElement, direction)
+        return false
+      }
+      return true
+    }
+
+    const sectionNavigableElements = {}
+    let allNavigableElements = []
+    for (const id in this._sections) {
+      sectionNavigableElements[id] = this._getSectionNavigableElements(id)
+      allNavigableElements = allNavigableElements.concat(sectionNavigableElements[id])
+    }
+
+    const config = {
+      ...this._config,
+      ...this._sections[currentSectionId],
+    }
+    let next, candidates
+
+    if (config.restrict === 'self-only' || config.restrict === 'self-first') {
+      const currentSectionNavigableElements = sectionNavigableElements[currentSectionId]
+      candidates = exclude(currentSectionNavigableElements, currentFocusedElement)
+      next = this._navigate(currentFocusedElement, direction, candidates, config)
+
+      if (!next && config.restrict === 'self-first') {
+        candidates = exclude(allNavigableElements, currentSectionNavigableElements)
+        next = this._navigate(currentFocusedElement, direction, candidates, config)
+      }
+    } else {
+      candidates = exclude(allNavigableElements, currentFocusedElement)
+      next = this._navigate(currentFocusedElement, direction, candidates, config)
+    }
+
+    if (next) {
+      this._sections[currentSectionId].previous = {
+        target: currentFocusedElement,
+        destination: next,
+        reverse: getReverse(direction),
       }
 
-  if (!dest)
-    dest = destGroup[0].element
+      const nextSectionId = this._getSectionId(next)
 
-  // dest = rects && rects.length && rects[0].element
-  // console.log('>>> dest ', dest)
+      if (currentSectionId !== nextSectionId) {
+        const result = this._gotoLeaveFor(currentSectionId, direction)
+        if (result) {
+          return true
+        } else if (result === null) {
+          this._fireNavigateFailed(currentFocusedElement, direction)
+          return false
+        }
 
-  return dest
-}
+        let enterToElement
+        switch (this._sections[nextSectionId].enterTo) {
+        case 'last-focused':
+          enterToElement = this._getSectionLastFocusedElement(nextSectionId)
+          || this._getSectionDefaultElement(nextSectionId)
+          break
+        case 'default-element':
+          enterToElement = this._getSectionDefaultElement(nextSectionId)
+          break
+        }
+        if (enterToElement)
+          next = enterToElement
+      }
+      return this._focusElement(next, nextSectionId, direction)
+    } else if (this._gotoLeaveFor(currentSectionId, direction)) {
+      return true
+    }
 
-/**
- * Private Function
- */
-const generateId = () => {
-  let id
-  do
-    id = ID_POOL_PREFIX + String(++_idPool)
-  while (_sections[id])
-  return id
-}
-
-const parseSelector = selector => {
-  let result
-  if (typeof selector === 'string')
-    result = [].slice.call(document.querySelectorAll(selector))
-  else if (typeof selector === 'object' && selector.length)
-    result = [].slice.call(selector)
-  else if (typeof selector === 'object' && selector.nodeType === 1)
-    result = [selector]
-  else
-    result = []
-  return result
-}
-
-const matchSelector = (element, selector) => {
-  if (typeof selector === 'string')
-    return elementMatchesSelector.call(element, selector)
-  else if (typeof selector === 'object' && selector.length)
-    return selector.indexOf(element) >= 0
-  else if (typeof selector === 'object' && selector.nodeType === 1)
-    return element === selector
-  return false
-}
-
-const getCurrentFocusedElement = () => {
-  const { activeElement } = document
-  if (activeElement && activeElement !== document.body)
-    return activeElement
-}
-
-const extend = (config, ...args) => {
-  const out = config || {}
-  for (let i = 1; i < args.length; i++) {
-    if (!args[i])
-      continue
-    for (const key in args[i])
-      if (Object.prototype.hasOwnProperty.call(args[i], key) && args[i][key] !== undefined)
-        out[key] = args[i][key]
+    this._fireNavigateFailed(currentFocusedElement, direction)
+    return false
   }
-  return out
-}
 
-const exclude = (elemList, excludedElem) => {
-  for (const element in Array.from(excludedElem)) {
-    const index = elemList.indexOf(element)
-    if (index >= 0)
-      elemList.splice(index, 1)
+  _focusChanged = (element, sectionId) => {
+    const section = sectionId || this._getSectionId(element)
+
+    if (section) {
+      this._sections[section].lastFocusedElement = element
+      this._lastSectionId = section
+    }
   }
-  return elemList
-}
 
-const isNavigable = (element, sectionId, verifySectionSelector) => {
-  if (!element || !sectionId || !_sections[sectionId] || _sections[sectionId].disabled)
-    return false
-
-  if ((element.offsetWidth <= 0 && element.offsetHeight <= 0) || element.hasAttribute('disabled'))
-    return false
-
-  if (verifySectionSelector && !matchSelector(element, _sections[sectionId].selector))
-    return false
-
-  if (typeof _sections[sectionId].navigableFilter === 'function') {
-    if (_sections[sectionId].navigableFilter(element, sectionId) === false)
+  _focusElement = (element, sectionId, direction) => {
+    if (!element)
       return false
-  } else if (typeof GlobalConfig.navigableFilter === 'function') {
-    if (GlobalConfig.navigableFilter(element, sectionId) === false)
-      return false
-  }
-  return true
-}
 
-const getSectionId = element => {
-  for (const id in _sections)
-    if (!_sections[id].disabled && element && matchSelector(element, _sections[id].selector))
-      return id
-}
+    const currentFocusedElement = this._getCurrentFocusedElement()
 
-const getSectionNavigableElements = sectionId => parseSelector(_sections[sectionId].selector).filter(element => isNavigable(element, sectionId))
+    const silentFocus = () => {
+      if (currentFocusedElement)
+        currentFocusedElement.blur()
 
-const getSectionDefaultElement = sectionId => {
-  let { defaultElement } = _sections[sectionId]
-  if (!defaultElement)
-    return null
+      element.focus()
+      this._focusChanged(element, sectionId)
+    }
 
-  if (typeof defaultElement === 'string')
-    [defaultElement] = parseSelector(defaultElement)
+    if (this._duringFocusChange) {
+      silentFocus()
+      return true
+    }
 
-  if (isNavigable(defaultElement, sectionId, true))
-    return defaultElement
+    this._duringFocusChange = true
 
-  return null
-}
+    if (this._pause) {
+      silentFocus()
+      this._duringFocusChange = false
+      return true
+    }
 
-const getSectionLastFocusedElement = sectionId => {
-  const lastFocusedElement = _sections[sectionId] && _sections[sectionId].lastFocusedElement
-  if (!isNavigable(lastFocusedElement, sectionId, true))
-    return null
-
-  return lastFocusedElement
-}
-
-const fireEvent = (element, type, details, cancelable = true) => {
-  const evt = document.createEvent('CustomEvent')
-  evt.initCustomEvent(EVENT_PREFIX + type, true, cancelable, details)
-  return element.dispatchEvent(evt)
-}
-
-const focusChanged = (element, sectionId) => {
-  const section = sectionId || getSectionId(element)
-
-  if (section) {
-    _sections[section].lastFocusedElement = element
-    _lastSectionId = section
-  }
-}
-
-const focusElement = (element, sectionId, direction) => {
-  if (!element)
-    return false
-
-  const currentFocusedElement = getCurrentFocusedElement()
-
-  const silentFocus = () => {
-    if (currentFocusedElement)
+    if (currentFocusedElement) {
+      const unfocusProperties = {
+        nextElement: element,
+        nextSectionId: sectionId,
+        direction,
+        native: false,
+      }
+      if (!this._eventsManager.fireEvent(currentFocusedElement, 'willunfocus', unfocusProperties)) {
+        this._duringFocusChange = false
+        return false
+      }
       currentFocusedElement.blur()
+      this._eventsManager.fireEvent(currentFocusedElement, 'unfocused', unfocusProperties, false)
+    }
 
-    element.focus()
-    focusChanged(element, sectionId)
-  }
-
-  if (_duringFocusChange) {
-    silentFocus()
-    return true
-  }
-
-  _duringFocusChange = true
-
-  if (_pause) {
-    silentFocus()
-    _duringFocusChange = false
-    return true
-  }
-
-  if (currentFocusedElement) {
-    const unfocusProperties = {
-      nextElement: element,
-      nextSectionId: sectionId,
+    const focusProperties = {
+      previousElement: currentFocusedElement,
+      sectionId,
       direction,
       native: false,
     }
-    if (!fireEvent(currentFocusedElement, 'willunfocus', unfocusProperties)) {
-      _duringFocusChange = false
+
+    if (!this._eventsManager.fireEvent(element, 'willfocus', focusProperties)) {
+      this._duringFocusChange = false
       return false
     }
-    currentFocusedElement.blur()
-    fireEvent(currentFocusedElement, 'unfocused', unfocusProperties, false)
+
+    element.focus()
+    this._eventsManager.fireEvent(element, 'focused', focusProperties, false)
+
+    this._duringFocusChange = false
+
+    this.focusChanged(element, sectionId)
+    return true
   }
 
-  const focusProperties = {
-    previousElement: currentFocusedElement,
-    sectionId,
-    direction,
-    native: false,
-  }
+  _focusSection = sectionId => {
+    const range = []
+    const addRange = id => {
+      if (id && range.indexOf(id) < 0 && this._sections[id] && !this._sections[id].disabled)
+        range.push(id)
+    }
 
-  if (!fireEvent(element, 'willfocus', focusProperties)) {
-    _duringFocusChange = false
+    if (sectionId) {
+      addRange(sectionId)
+    } else {
+      addRange(this._defaultSectionId)
+      addRange(this._lastSectionId)
+      Object.keys(this._sections).map(addRange)
+    }
+
+    for (let i = 0; i < range.length; i++) {
+      const id = range[i]
+      let next
+
+      if (this._sections[id].enterTo === 'last-focused')
+        next = this._getSectionLastFocusedElement(id)
+        || this._getSectionDefaultElement(id)
+        || this._getSectionNavigableElements(id)[0]
+      else
+        next = this._getSectionDefaultElement(id)
+        || this._getSectionLastFocusedElement(id)
+        || this._getSectionNavigableElements(id)[0]
+
+      if (next)
+        return this._focusElement(next, id)
+    }
+
     return false
   }
 
-  element.focus()
-  fireEvent(element, 'focused', focusProperties, false)
-
-  _duringFocusChange = false
-
-  focusChanged(element, sectionId)
-  return true
-}
-
-const focusSection = sectionId => {
-  const range = []
-  const addRange = id => {
-    if (id && range.indexOf(id) < 0 && _sections[id] && !_sections[id].disabled)
-      range.push(id)
-  }
-
-  if (sectionId) {
-    addRange(sectionId)
-  } else {
-    addRange(_defaultSectionId)
-    addRange(_lastSectionId)
-    Object.keys(_sections).map(addRange)
-  }
-
-  for (let i = 0; i < range.length; i++) {
-    const id = range[i]
-    let next
-
-    if (_sections[id].enterTo === 'last-focused')
-      next = getSectionLastFocusedElement(id) || getSectionDefaultElement(id) || getSectionNavigableElements(id)[0]
-    else
-      next = getSectionDefaultElement(id) || getSectionLastFocusedElement(id) || getSectionNavigableElements(id)[0]
-
-    if (next)
-      return focusElement(next, id)
-  }
-
-  return false
-}
-
-const focusExtendedSelector = (selector, direction) => {
-  if (selector.charAt(0) === '@') {
-    if (selector.length === 1)
-      return focusSection()
-    const sectionId = selector.substr(1)
-    return focusSection(sectionId)
-  }
-  const [next] = parseSelector(selector)
-  if (next) {
-    const nextSectionId = getSectionId(next)
-    if (isNavigable(next, nextSectionId))
-      return focusElement(next, nextSectionId, direction)
-  }
-  return false
-}
-
-const fireNavigateFailed = (element, direction) => fireEvent(element, 'navigatefailed', { direction }, false)
-
-const gotoLeaveFor = (sectionId, direction) => {
-  if (_sections[sectionId].leaveFor && _sections[sectionId].leaveFor[direction] !== undefined) {
-    const next = _sections[sectionId].leaveFor[direction]
-
-    if (typeof next === 'string') {
-      if (next === '')
-        return null
-
-      return focusExtendedSelector(next, direction)
+  _focusExtendedSelector = (selector, direction) => {
+    if (selector.charAt(0) === '@') {
+      if (selector.length === 1)
+        return this._focusSection()
+      const sectionId = selector.substr(1)
+      return this._focusSection(sectionId)
     }
-
-    const nextSectionId = getSectionId(next)
-    if (isNavigable(next, nextSectionId))
-      return focusElement(next, nextSectionId, direction)
-  }
-  return false
-}
-
-const focusNext = (direction, currentFocusedElement, currentSectionId) => {
-  const extSelector = currentFocusedElement.getAttribute(`data-sn-${direction}`)
-  if (typeof extSelector === 'string') {
-    if (extSelector === ''
-      || !focusExtendedSelector(extSelector, direction)) {
-      fireNavigateFailed(currentFocusedElement, direction)
-      return false
+    const [next] = parseSelector(selector)
+    if (next) {
+      const nextSectionId = this._getSectionId(next)
+      if (this._isNavigable(next, nextSectionId))
+        return this._focusElement(next, nextSectionId, direction)
     }
-    return true
+    return false
   }
 
-  const sectionNavigableElements = {}
-  let allNavigableElements = []
-  for (const id in _sections) {
-    sectionNavigableElements[id] = getSectionNavigableElements(id)
-    allNavigableElements = allNavigableElements.concat(sectionNavigableElements[id])
+  _getSectionId = element => {
+    for (const id in this._sections)
+      if (!this._sections[id].disabled && element && matchSelector(element, this._sections[id].selector))
+        return id
   }
 
-  const config = extend({}, GlobalConfig, _sections[currentSectionId])
-  let next, candidates
+  _getSectionNavigableElements = sectionId => parseSelector(this._sections[sectionId].selector)
+    .filter(element => this._isNavigable(element, sectionId))
 
-  if (config.restrict === 'self-only' || config.restrict === 'self-first') {
-    const currentSectionNavigableElements = sectionNavigableElements[currentSectionId]
-    candidates = exclude(currentSectionNavigableElements, currentFocusedElement)
-    next = navigate(currentFocusedElement, direction, candidates, config)
+  _getSectionDefaultElement = sectionId => {
+    let { defaultElement } = this._sections[sectionId]
+    if (!defaultElement)
+      return null
 
-    if (!next && config.restrict === 'self-first') {
-      candidates = exclude(allNavigableElements, currentSectionNavigableElements)
-      next = navigate(currentFocusedElement, direction, candidates, config)
-    }
-  } else {
-    candidates = exclude(allNavigableElements, currentFocusedElement)
-    next = navigate(currentFocusedElement, direction, candidates, config)
+    if (typeof defaultElement === 'string')
+      [defaultElement] = parseSelector(defaultElement)
+
+    if (this._isNavigable(defaultElement, sectionId, true))
+      return defaultElement
+
+    return null
   }
 
-  if (next) {
-    _sections[currentSectionId].previous = {
-      target: currentFocusedElement,
-      destination: next,
-      reverse: REVERSE[direction],
-    }
+  _getSectionLastFocusedElement = sectionId => {
+    const lastFocusedElement = this._sections[sectionId] && this._sections[sectionId].lastFocusedElement
+    if (!this._isNavigable(lastFocusedElement, sectionId, true))
+      return null
 
-    const nextSectionId = getSectionId(next)
+    return lastFocusedElement
+  }
 
-    if (currentSectionId !== nextSectionId) {
-      const result = gotoLeaveFor(currentSectionId, direction)
-      if (result) {
-        return true
-      } else if (result === null) {
-        fireNavigateFailed(currentFocusedElement, direction)
-        return false
+  _getCurrentFocusedElement = () => {
+    const { activeElement } = document
+    if (activeElement && activeElement !== document.body)
+      return activeElement
+  }
+
+  _fireNavigateFailed = (element, direction) => this._eventsManager.fireEvent(element, 'navigatefailed', { direction }, false)
+
+  _gotoLeaveFor = (sectionId, direction) => {
+    if (this._sections[sectionId].leaveFor && this._sections[sectionId].leaveFor[direction] !== undefined) {
+      const next = this._sections[sectionId].leaveFor[direction]
+
+      if (typeof next === 'string') {
+        if (next === '')
+          return null
+
+        return this._focusExtendedSelector(next, direction)
       }
 
-      let enterToElement
-      switch (_sections[nextSectionId].enterTo) {
-        case 'last-focused':
-          enterToElement = getSectionLastFocusedElement(nextSectionId) || getSectionDefaultElement(nextSectionId)
-          break
-        case 'default-element':
-          enterToElement = getSectionDefaultElement(nextSectionId)
-          break
-      }
-      if (enterToElement)
-        next = enterToElement
+      const nextSectionId = this._getSectionId(next)
+      if (this._isNavigable(next, nextSectionId))
+        return this._focusElement(next, nextSectionId, direction)
     }
-    return focusElement(next, nextSectionId, direction)
-  } else if (gotoLeaveFor(currentSectionId, direction)) {
-    return true
+    return false
   }
 
-  fireNavigateFailed(currentFocusedElement, direction)
-  return false
-}
+  _generateId = () => {
+    let id
+    do
+      id = this._config.idPoolPrefix + String(++this._idPool)
+    while (this._sections[id])
+    return id
+  }
 
-const preventDefault = evt => {
-  evt.preventDefault()
-  evt.stopPropagation()
-  return false
-}
+  /**
+   * Events
+   */
 
-const onMouseOver = evt => {
-  const { target } = evt
-  if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
-    return
+  _onMouseOver = evt => {
+    const { target } = evt
+    if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
+      return
 
-  const element = target.classList.contains('focusable') ? target : target.closest('.focusable')
+    const element = target.classList.contains('focusable') ? target : target.closest('.focusable')
 
-  focusElement(element, getSectionId(element))
+    this.focusElement(element, this._getSectionId(element))
 
-  return preventDefault(evt)
-}
-
-const onMouseDown = evt => {
-  const { target } = evt
-  if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
-    return
-
-  const element = target.classList.contains('focusable') ? target : target.closest('.focusable')
-
-  if (!fireEvent(element, 'enter-down'))
     return preventDefault(evt)
-}
+  }
 
-const onKeyDown = evt => {
-  if (!_sectionCount || _pause || evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
-    return
+  _onMouseDown = evt => {
+    const { target } = evt
+    if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
+      return
 
-  let currentFocusedElement = getCurrentFocusedElement()
-  const currentSectionId = getSectionId(currentFocusedElement)
-  const keyMappping = KEYMAPPING[evt.keyCode]
+    const element = target.classList.contains('focusable') ? target : target.closest('.focusable')
 
-  if (!keyMappping)
-    return
+    if (!this._eventsManager.fireEvent(element, 'enter-down'))
+      return preventDefault(evt)
+  }
 
-  if (keyMappping === 'enter')
-    if (currentFocusedElement && currentSectionId)
-      if (!fireEvent(currentFocusedElement, 'enter-down'))
-        return preventDefault(evt)
+  _onKeyDown = evt => {
+    if (!this._sectionCount || this._pause || evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
+      return
 
-  if (!currentFocusedElement) {
-    if (_lastSectionId)
-      currentFocusedElement = getSectionLastFocusedElement(_lastSectionId)
+    let currentFocusedElement = this._getCurrentFocusedElement()
+    const currentSectionId = this._getSectionId(currentFocusedElement)
+    const keyMappping = getKeyMapping(evt.keyCode)
+
+    if (!keyMappping)
+      return
+
+    if (keyMappping === 'enter')
+      if (currentFocusedElement && currentSectionId)
+        if (!this._eventsManager.fireEvent(currentFocusedElement, 'enter-down'))
+          return preventDefault(evt)
 
     if (!currentFocusedElement) {
-      focusSection()
-      return preventDefault(evt)
+      if (this._lastSectionId)
+        currentFocusedElement = this._getSectionLastFocusedElement(this._lastSectionId)
+
+      if (!currentFocusedElement) {
+        this.focusSection()
+        return preventDefault(evt)
+      }
+    }
+
+    if (!currentSectionId)
+      return
+
+    const willmoveProperties = {
+      direction: keyMappping,
+      sectionId: currentSectionId,
+      cause: 'keydown',
+    }
+
+    if (this._eventsManager.fireEvent(currentFocusedElement, 'willmove', willmoveProperties))
+      this._focusNext(keyMappping, currentFocusedElement, currentSectionId)
+
+    return preventDefault(evt)
+  }
+
+  _onKeyUp = evt => {
+    if (evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
+      return
+
+    if (!this._pause && this._sectionCount && getKeyMapping(evt.keyCode) === 'center') {
+      const currentFocusedElement = this._getCurrentFocusedElement()
+      if (currentFocusedElement && this._getSectionId(currentFocusedElement))
+        if (!this._eventsManager.fireEvent(currentFocusedElement, 'enter-up')) {
+          preventDefault(evt)
+        }
     }
   }
 
-  if (!currentSectionId)
-    return
+  _onFocus = evt => {
+    const { target } = evt
+    if (target !== window && target !== document && this._sectionCount && !this._duringFocusChange) {
+      const sectionId = this._getSectionId(target)
+      if (sectionId) {
+        if (this._pause) {
+          this._focusChanged(target, sectionId)
+          return
+        }
 
-  const willmoveProperties = {
-    direction: keyMappping,
-    sectionId: currentSectionId,
-    cause: 'keydown',
+        const focusProperties = {
+          sectionId,
+          native: true,
+        }
+
+        const willfocusSuccess = this._eventsManager.fireEvent(target, 'willfocus', focusProperties)
+        if (willfocusSuccess) {
+          this._eventsManager.fireEvent(target, 'focused', focusProperties, false)
+          this._focusChanged(target, sectionId)
+        } else {
+          this._duringFocusChange = true
+          target.blur()
+          this._duringFocusChange = false
+        }
+      }
+    }
   }
 
-  if (fireEvent(currentFocusedElement, 'willmove', willmoveProperties))
-    focusNext(keyMappping, currentFocusedElement, currentSectionId)
-
-  return preventDefault(evt)
-}
-
-const onKeyUp = evt => {
-  if (evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
-    return
-
-  if (!_pause && _sectionCount && KEYMAPPING[evt.keyCode] === 'center') {
-    const currentFocusedElement = getCurrentFocusedElement()
-    if (currentFocusedElement && getSectionId(currentFocusedElement))
-      if (!fireEvent(currentFocusedElement, 'enter-up')) {
-        preventDefault(evt)
-      }
-  }
-}
-
-const onFocus = evt => {
-  const { target } = evt
-  if (target !== window && target !== document && _sectionCount && !_duringFocusChange) {
-    const sectionId = getSectionId(target)
-    if (sectionId) {
-      if (_pause) {
-        focusChanged(target, sectionId)
-        return
-      }
-
-      const focusProperties = {
-        sectionId,
-        native: true,
-      }
-
-      const willfocusSuccess = fireEvent(target, 'willfocus', focusProperties)
-      if (willfocusSuccess) {
-        fireEvent(target, 'focused', focusProperties, false)
-        focusChanged(target, sectionId)
+  _onBlur = evt => {
+    const { target } = evt
+    if (target !== window
+      && target !== document
+      && !this._pause
+      && this._sectionCount
+      && !this._duringFocusChange
+      && this._getSectionId(target)) {
+      const unfocusProperties = { native: true }
+      const willunfocusSuccess = this._eventsManager.fireEvent(target, 'willunfocus', unfocusProperties)
+      if (willunfocusSuccess) {
+        this._eventsManager.fireEvent(target, 'unfocused', unfocusProperties, false)
       } else {
-        _duringFocusChange = true
-        target.blur()
-        _duringFocusChange = false
+        this._duringFocusChange = true
+        setTimeout(() => {
+          target.focus()
+          this._duringFocusChange = false
+        })
       }
     }
   }
-}
 
-const onBlur = evt => {
-  const { target } = evt
-  if (target !== window
-    && target !== document
-    && !_pause
-    && _sectionCount
-    && !_duringFocusChange
-    && getSectionId(target)) {
-    const unfocusProperties = { native: true }
-    const willunfocusSuccess = fireEvent(target, 'willunfocus', unfocusProperties)
-    if (willunfocusSuccess) {
-      fireEvent(target, 'unfocused', unfocusProperties, false)
-    } else {
-      _duringFocusChange = true
-      setTimeout(() => {
-        target.focus()
-        _duringFocusChange = false
-      })
-    }
+  _handleFocused = event => {
+    if (this._focusedPath !== event.detail.sectionId)
+      this.setCurrentFocusedPath(event.detail.sectionId)
   }
-}
-
-/**
- * Public Function
- */
-const Navigation = {
-
 }

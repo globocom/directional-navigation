@@ -1,3 +1,5 @@
+
+(function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.head.appendChild(r) })(window.document);
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -7,6 +9,51 @@
   var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
   function _classCallCheck(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  var EventsManager = function () {
+    function EventsManager(eventPrefix) {
+      _classCallCheck(this, EventsManager);
+
+      this._eventPrefix = eventPrefix;
+    }
+
+    _createClass(EventsManager, [{
+      key: 'addListener',
+      value: function addListener(target, event, handler) {
+        var capture = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+        if (typeof target === 'string') document.querySelectorAll(target).forEach(function (elem) {
+          return elem.addEventListener(event, handler, capture);
+        });
+        target.addEventListener(event, handler, capture);
+      }
+    }, {
+      key: 'removeListener',
+      value: function removeListener(target, event, handler) {
+        var capture = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : false;
+
+        if (typeof target === 'string') document.querySelectorAll(target).forEach(function (elem) {
+          return elem.removeEventListener(event, handler, capture);
+        });
+        target.removeEventListener(event, handler, capture);
+      }
+    }, {
+      key: 'fireEvent',
+      value: function fireEvent(element, type, details) {
+        var cancelable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
+
+        var evt = document.createEvent('CustomEvent');
+        evt.initCustomEvent(this._eventPrefix + type, true, cancelable, details);
+        return element.dispatchEvent(evt);
+      }
+    }]);
+
+    return EventsManager;
+  }();
+
+  var _createClass$1 = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  function _classCallCheck$1(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
   /**
    * The Minkowski distance between two points gets generalized
@@ -32,10 +79,10 @@
 
   var MinkowskiDistance = function () {
     function MinkowskiDistance() {
-      _classCallCheck(this, MinkowskiDistance);
+      _classCallCheck$1(this, MinkowskiDistance);
     }
 
-    _createClass(MinkowskiDistance, [{
+    _createClass$1(MinkowskiDistance, [{
       key: 'chebyshevDistance',
       value: function chebyshevDistance(x, y, lx, p, mathfn) {
         var result = -p;
@@ -80,92 +127,6 @@
 
   var MinkowskiDistance$1 = new MinkowskiDistance();
 
-  var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
-
-  var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
-
-  var GlobalConfig = {
-    selector: '', // can be a valid <extSelector> except "@" syntax.
-    straightOnly: false,
-    straightOverlapThreshold: 0.35,
-    rememberSource: false,
-    disabled: false,
-    defaultElement: '', // <extSelector> except "@" syntax.
-    enterTo: '', // '', 'last-focused', 'default-element'
-    leaveFor: null, // {left: <extSelector>, right: <extSelector>, up: <extSelector>, down: <extSelector>}
-    restrict: 'self-first', // 'self-first', 'self-only', 'none'
-    tabIndexIgnoreList: [],
-    navigableFilter: null
-
-    /**
-     * Constant Variable
-     */
-  };var KEYMAPPING = {
-    4: 'left',
-    21: 'left',
-    37: 'left',
-    214: 'left',
-    205: 'left',
-    218: 'left',
-    5: 'right',
-    22: 'right',
-    39: 'right',
-    213: 'right',
-    206: 'right',
-    217: 'right',
-    29460: 'up',
-    19: 'up',
-    38: 'up',
-    211: 'up',
-    203: 'up',
-    215: 'up',
-    29461: 'down',
-    20: 'down',
-    40: 'down',
-    212: 'down',
-    204: 'down',
-    216: 'down',
-    29443: 'enter',
-    13: 'enter',
-    67: 'enter',
-    32: 'enter',
-    23: 'enter',
-    195: 'enter'
-  };
-
-  var REVERSE = {
-    left: 'right',
-    up: 'down',
-    right: 'left',
-    down: 'up'
-  };
-
-  var EVENT_PREFIX = 'sn:';
-  var ID_POOL_PREFIX = 'section-';
-
-  /**
-   * Private Variable
-   */
-  var _idPool = 0;
-  var _ready = false;
-  var _pause = false;
-  var _sections = {};
-  var _sectionCount = 0;
-  var _defaultSectionId = '';
-  var _lastSectionId = '';
-  var _duringFocusChange = false;
-
-  /**
-   * Polyfill
-   */
-  var elementMatchesSelector = Element.prototype.matches || Element.prototype.matchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector || Element.prototype.oMatchesSelector || function (selector) {
-    var matchedNodes = (this.parentNode || this.document).querySelectorAll(selector);
-    return [].slice.call(matchedNodes).indexOf(this) >= 0;
-  };
-
-  /**
-   * Core Function
-   */
   var getRect = function getRect(element) {
     var cr = element.getBoundingClientRect();
     var rect = {
@@ -259,93 +220,54 @@
     return destPriority.group;
   };
 
-  var navigate = function navigate(target, direction, candidates, config) {
-    if (!target || !direction || !candidates || !candidates.length) return null;
-
-    var targetRect = getRect(target);
-    if (!targetRect) return null;
-
-    var rects = [];
-    candidates.forEach(function (candidate) {
-      var rect = getRect(candidate);
-      if (rect) rects.push(rect);
-    });
-
-    if (!rects.length) return null;
-
-    var distanceFunction = generateDistanceFunction(targetRect);
-
-    var priorities = void 0;
-
-    switch (direction) {
-      case 'left':
-        rects = rects.filter(function (element) {
-          return element.center.x < targetRect.center.x;
-        });
-        priorities = [{
-          group: rects,
-          distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
-        }];
-        break;
-      case 'right':
-        rects = rects.filter(function (element) {
-          return element.center.x > targetRect.center.x;
-        });
-        priorities = [{
-          group: rects,
-          distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
-        }];
-        break;
-      case 'up':
-        rects = rects.filter(function (element) {
-          return element.center.y < targetRect.center.y;
-        });
-        priorities = [{
-          group: rects,
-          distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
-        }];
-        break;
-      case 'down':
-        rects = rects.filter(function (element) {
-          return element.center.y > targetRect.center.y;
-        });
-        priorities = [{
-          group: rects,
-          distance: [distanceFunction.nearestIsBetter, distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter, distanceFunction.nearTargetLeftIsBetter]
-        }];
-        break;
-      default:
-        return null;
-    }
-
-    if (config.straightOnly) priorities.pop();
-
-    var destGroup = prioritize(priorities);
-    if (!destGroup) return null;
-
-    var dest = void 0;
-    if (config.rememberSource && config.previous && config.previous.destination === target && config.previous.reverse === direction) for (var destination in destGroup) {
-      if (destination.element === config.previous.target) {
-        dest = destination.element;
-        break;
-      }
-    }if (!dest) dest = destGroup[0].element;
-
-    // dest = rects && rects.length && rects[0].element
-    // console.log('>>> dest ', dest)
-
-    return dest;
+  var KEYMAPPING = {
+    4: 'left',
+    21: 'left',
+    37: 'left',
+    214: 'left',
+    205: 'left',
+    218: 'left',
+    5: 'right',
+    22: 'right',
+    39: 'right',
+    213: 'right',
+    206: 'right',
+    217: 'right',
+    29460: 'up',
+    19: 'up',
+    38: 'up',
+    211: 'up',
+    203: 'up',
+    215: 'up',
+    29461: 'down',
+    20: 'down',
+    40: 'down',
+    212: 'down',
+    204: 'down',
+    216: 'down',
+    29443: 'enter',
+    13: 'enter',
+    67: 'enter',
+    32: 'enter',
+    23: 'enter',
+    195: 'enter'
   };
 
-  /**
-   * Private Function
-   */
-  var generateId = function generateId() {
-    var id = void 0;
-    do {
-      id = ID_POOL_PREFIX + String(++_idPool);
-    } while (_sections[id]);
-    return id;
+  var getKeyMapping = function getKeyMapping(keyCode) {
+    return KEYMAPPING[keyCode];
+  };
+
+  var elementMatchesSelector = Element.prototype.matches || Element.prototype.matchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector || Element.prototype.oMatchesSelector || function (selector) {
+    var matchedNodes = (this.parentNode || this.document).querySelectorAll(selector);
+    return [].slice.call(matchedNodes).indexOf(this) >= 0;
+  };
+
+  var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+  var preventDefault = function preventDefault(evt) {
+    evt.preventDefault();
+    evt.stopPropagation();
+    return false;
   };
 
   var parseSelector = function parseSelector(selector) {
@@ -359,28 +281,6 @@
     return false;
   };
 
-  var getCurrentFocusedElement = function getCurrentFocusedElement() {
-    var _document = document,
-        activeElement = _document.activeElement;
-
-    if (activeElement && activeElement !== document.body) return activeElement;
-  };
-
-  var extend = function extend(config) {
-    for (var _len = arguments.length, args = Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) {
-      args[_key - 1] = arguments[_key];
-    }
-
-    var out = config || {};
-    for (var i = 1; i < args.length; i++) {
-      if (!args[i]) continue;
-      for (var key in args[i]) {
-        if (Object.prototype.hasOwnProperty.call(args[i], key) && args[i][key] !== undefined) out[key] = args[i][key];
-      }
-    }
-    return out;
-  };
-
   var exclude = function exclude(elemList, excludedElem) {
     for (var element in Array.from(excludedElem)) {
       var index = elemList.indexOf(element);
@@ -389,430 +289,158 @@
     return elemList;
   };
 
-  var isNavigable = function isNavigable(element, sectionId, verifySectionSelector) {
-    if (!element || !sectionId || !_sections[sectionId] || _sections[sectionId].disabled) return false;
-
-    if (element.offsetWidth <= 0 && element.offsetHeight <= 0 || element.hasAttribute('disabled')) return false;
-
-    if (verifySectionSelector && !matchSelector(element, _sections[sectionId].selector)) return false;
-
-    if (typeof _sections[sectionId].navigableFilter === 'function') {
-      if (_sections[sectionId].navigableFilter(element, sectionId) === false) return false;
-    } else if (typeof GlobalConfig.navigableFilter === 'function') {
-      if (GlobalConfig.navigableFilter(element, sectionId) === false) return false;
-    }
-    return true;
+  var getReverse = function getReverse(direction) {
+    return {
+      left: 'right',
+      up: 'down',
+      right: 'left',
+      down: 'up'
+    }[direction];
   };
 
-  var getSectionId = function getSectionId(element) {
-    for (var id in _sections) {
-      if (!_sections[id].disabled && element && matchSelector(element, _sections[id].selector)) return id;
-    }
+  var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
+
+  var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
+
+  var _typeof$1 = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+  function _classCallCheck$2(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
+
+  var defaultConfig = {
+    selector: '',
+    straightOnly: false,
+    straightOverlapThreshold: 0.35,
+    rememberSource: false,
+    disabled: false,
+    defaultElement: '',
+    enterTo: '',
+    leaveFor: null,
+    restrict: 'self-first',
+    tabIndexIgnoreList: [],
+    navigableFilter: null,
+    eventPrefix: 'sn:',
+    idPoolPrefix: 'section-'
   };
 
-  var getSectionNavigableElements = function getSectionNavigableElements(sectionId) {
-    return parseSelector(_sections[sectionId].selector).filter(function (element) {
-      return isNavigable(element, sectionId);
-    });
-  };
+  var Navigator = function Navigator(config) {
+    _classCallCheck$2(this, Navigator);
 
-  var getSectionDefaultElement = function getSectionDefaultElement(sectionId) {
-    var defaultElement = _sections[sectionId].defaultElement;
+    _initialiseProps.call(this);
 
-    if (!defaultElement) return null;
+    Object.assign(defaultConfig, config);
+    this._config = config;
+    this._ready = false;
+    this._idPool = 0;
+    this._pause = false;
+    this._sections = {};
+    this._sectionCount = 0;
+    this._defaultSectionId = '';
+    this._lastSectionId = '';
+    this._duringFocusChange = false;
+    this._focusedPath = null;
+    this._eventsManager = new EventsManager(this._config.eventPrefix);
+  }
 
-    if (typeof defaultElement === 'string') {
+  // set(<config>)
+  // set(<sectionId>, <config>)
 
-      var _parseSelector = parseSelector(defaultElement);
 
-      var _parseSelector2 = _slicedToArray(_parseSelector, 1);
+  // add(<config>)
+  // add(<sectionId>, <config>)
 
-      defaultElement = _parseSelector2[0];
-    }if (isNavigable(defaultElement, sectionId, true)) return defaultElement;
 
-    return null;
-  };
+  // focus([silent])
+  // focus(<sectionId>, [silent])
+  // focus(<extSelector>, [silent])
+  // Note: "silent" is optional and default to false
 
-  var getSectionLastFocusedElement = function getSectionLastFocusedElement(sectionId) {
-    var lastFocusedElement = _sections[sectionId] && _sections[sectionId].lastFocusedElement;
-    if (!isNavigable(lastFocusedElement, sectionId, true)) return null;
 
-    return lastFocusedElement;
-  };
+  // move(<direction>)
+  // move(<direction>, <selector>)
 
-  var fireEvent = function fireEvent(element, type, details) {
-    var cancelable = arguments.length > 3 && arguments[3] !== undefined ? arguments[3] : true;
-
-    var evt = document.createEvent('CustomEvent');
-    evt.initCustomEvent(EVENT_PREFIX + type, true, cancelable, details);
-    return element.dispatchEvent(evt);
-  };
-
-  var focusChanged = function focusChanged(element, sectionId) {
-    var section = sectionId || getSectionId(element);
-
-    if (section) {
-      _sections[section].lastFocusedElement = element;
-      _lastSectionId = section;
-    }
-  };
-
-  var focusElement = function focusElement(element, sectionId, direction) {
-    if (!element) return false;
-
-    var currentFocusedElement = getCurrentFocusedElement();
-
-    var silentFocus = function silentFocus() {
-      if (currentFocusedElement) currentFocusedElement.blur();
-
-      element.focus();
-      focusChanged(element, sectionId);
-    };
-
-    if (_duringFocusChange) {
-      silentFocus();
-      return true;
-    }
-
-    _duringFocusChange = true;
-
-    if (_pause) {
-      silentFocus();
-      _duringFocusChange = false;
-      return true;
-    }
-
-    if (currentFocusedElement) {
-      var unfocusProperties = {
-        nextElement: element,
-        nextSectionId: sectionId,
-        direction: direction,
-        native: false
-      };
-      if (!fireEvent(currentFocusedElement, 'willunfocus', unfocusProperties)) {
-        _duringFocusChange = false;
-        return false;
-      }
-      currentFocusedElement.blur();
-      fireEvent(currentFocusedElement, 'unfocused', unfocusProperties, false);
-    }
-
-    var focusProperties = {
-      previousElement: currentFocusedElement,
-      sectionId: sectionId,
-      direction: direction,
-      native: false
-    };
-
-    if (!fireEvent(element, 'willfocus', focusProperties)) {
-      _duringFocusChange = false;
-      return false;
-    }
-
-    element.focus();
-    fireEvent(element, 'focused', focusProperties, false);
-
-    _duringFocusChange = false;
-
-    focusChanged(element, sectionId);
-    return true;
-  };
-
-  var focusSection = function focusSection(sectionId) {
-    var range = [];
-    var addRange = function addRange(id) {
-      if (id && range.indexOf(id) < 0 && _sections[id] && !_sections[id].disabled) range.push(id);
-    };
-
-    if (sectionId) {
-      addRange(sectionId);
-    } else {
-      addRange(_defaultSectionId);
-      addRange(_lastSectionId);
-      Object.keys(_sections).map(addRange);
-    }
-
-    for (var i = 0; i < range.length; i++) {
-      var id = range[i];
-      var next = void 0;
-
-      if (_sections[id].enterTo === 'last-focused') next = getSectionLastFocusedElement(id) || getSectionDefaultElement(id) || getSectionNavigableElements(id)[0];else next = getSectionDefaultElement(id) || getSectionLastFocusedElement(id) || getSectionNavigableElements(id)[0];
-
-      if (next) return focusElement(next, id);
-    }
-
-    return false;
-  };
-
-  var focusExtendedSelector = function focusExtendedSelector(selector, direction) {
-    if (selector.charAt(0) === '@') {
-      if (selector.length === 1) return focusSection();
-      var sectionId = selector.substr(1);
-      return focusSection(sectionId);
-    }
-
-    var _parseSelector3 = parseSelector(selector),
-        _parseSelector4 = _slicedToArray(_parseSelector3, 1),
-        next = _parseSelector4[0];
-
-    if (next) {
-      var nextSectionId = getSectionId(next);
-      if (isNavigable(next, nextSectionId)) return focusElement(next, nextSectionId, direction);
-    }
-    return false;
-  };
-
-  var fireNavigateFailed = function fireNavigateFailed(element, direction) {
-    return fireEvent(element, 'navigatefailed', { direction: direction }, false);
-  };
-
-  var gotoLeaveFor = function gotoLeaveFor(sectionId, direction) {
-    if (_sections[sectionId].leaveFor && _sections[sectionId].leaveFor[direction] !== undefined) {
-      var next = _sections[sectionId].leaveFor[direction];
-
-      if (typeof next === 'string') {
-        if (next === '') return null;
-
-        return focusExtendedSelector(next, direction);
-      }
-
-      var nextSectionId = getSectionId(next);
-      if (isNavigable(next, nextSectionId)) return focusElement(next, nextSectionId, direction);
-    }
-    return false;
-  };
-
-  var focusNext = function focusNext(direction, currentFocusedElement, currentSectionId) {
-    var extSelector = currentFocusedElement.getAttribute('data-sn-' + direction);
-    if (typeof extSelector === 'string') {
-      if (extSelector === '' || !focusExtendedSelector(extSelector, direction)) {
-        fireNavigateFailed(currentFocusedElement, direction);
-        return false;
-      }
-      return true;
-    }
-
-    var sectionNavigableElements = {};
-    var allNavigableElements = [];
-    for (var id in _sections) {
-      sectionNavigableElements[id] = getSectionNavigableElements(id);
-      allNavigableElements = allNavigableElements.concat(sectionNavigableElements[id]);
-    }
-
-    var config = extend({}, GlobalConfig, _sections[currentSectionId]);
-    var next = void 0,
-        candidates = void 0;
-
-    if (config.restrict === 'self-only' || config.restrict === 'self-first') {
-      var currentSectionNavigableElements = sectionNavigableElements[currentSectionId];
-      candidates = exclude(currentSectionNavigableElements, currentFocusedElement);
-      next = navigate(currentFocusedElement, direction, candidates, config);
-
-      if (!next && config.restrict === 'self-first') {
-        candidates = exclude(allNavigableElements, currentSectionNavigableElements);
-        next = navigate(currentFocusedElement, direction, candidates, config);
-      }
-    } else {
-      candidates = exclude(allNavigableElements, currentFocusedElement);
-      next = navigate(currentFocusedElement, direction, candidates, config);
-    }
-
-    if (next) {
-      _sections[currentSectionId].previous = {
-        target: currentFocusedElement,
-        destination: next,
-        reverse: REVERSE[direction]
-      };
-
-      var nextSectionId = getSectionId(next);
-
-      if (currentSectionId !== nextSectionId) {
-        var result = gotoLeaveFor(currentSectionId, direction);
-        if (result) {
-          return true;
-        } else if (result === null) {
-          fireNavigateFailed(currentFocusedElement, direction);
-          return false;
-        }
-
-        var enterToElement = void 0;
-        switch (_sections[nextSectionId].enterTo) {
-          case 'last-focused':
-            enterToElement = getSectionLastFocusedElement(nextSectionId) || getSectionDefaultElement(nextSectionId);
-            break;
-          case 'default-element':
-            enterToElement = getSectionDefaultElement(nextSectionId);
-            break;
-        }
-        if (enterToElement) next = enterToElement;
-      }
-      return focusElement(next, nextSectionId, direction);
-    } else if (gotoLeaveFor(currentSectionId, direction)) {
-      return true;
-    }
-
-    fireNavigateFailed(currentFocusedElement, direction);
-    return false;
-  };
-
-  var preventDefault = function preventDefault(evt) {
-    evt.preventDefault();
-    evt.stopPropagation();
-    return false;
-  };
-
-  var onMouseOver = function onMouseOver(evt) {
-    var target = evt.target;
-
-    if (!target || !target.classList.contains('focusable') && !target.closest('.focusable')) return;
-
-    var element = target.classList.contains('focusable') ? target : target.closest('.focusable');
-
-    focusElement(element, getSectionId(element));
-
-    return preventDefault(evt);
-  };
-
-  var onMouseDown = function onMouseDown(evt) {
-    var target = evt.target;
-
-    if (!target || !target.classList.contains('focusable') && !target.closest('.focusable')) return;
-
-    var element = target.classList.contains('focusable') ? target : target.closest('.focusable');
-
-    if (!fireEvent(element, 'enter-down')) return preventDefault(evt);
-  };
-
-  var onKeyDown = function onKeyDown(evt) {
-    if (!_sectionCount || _pause || evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey) return;
-
-    var currentFocusedElement = getCurrentFocusedElement();
-    var currentSectionId = getSectionId(currentFocusedElement);
-    var keyMappping = KEYMAPPING[evt.keyCode];
-
-    if (!keyMappping) return;
-
-    if (keyMappping === 'enter') if (currentFocusedElement && currentSectionId) if (!fireEvent(currentFocusedElement, 'enter-down')) return preventDefault(evt);
-
-    if (!currentFocusedElement) {
-      if (_lastSectionId) currentFocusedElement = getSectionLastFocusedElement(_lastSectionId);
-
-      if (!currentFocusedElement) {
-        focusSection();
-        return preventDefault(evt);
-      }
-    }
-
-    if (!currentSectionId) return;
-
-    var willmoveProperties = {
-      direction: keyMappping,
-      sectionId: currentSectionId,
-      cause: 'keydown'
-    };
-
-    if (fireEvent(currentFocusedElement, 'willmove', willmoveProperties)) focusNext(keyMappping, currentFocusedElement, currentSectionId);
-
-    return preventDefault(evt);
-  };
-
-  var onKeyUp = function onKeyUp(evt) {
-    if (evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey) return;
-
-    if (!_pause && _sectionCount && KEYMAPPING[evt.keyCode] === 'center') {
-      var currentFocusedElement = getCurrentFocusedElement();
-      if (currentFocusedElement && getSectionId(currentFocusedElement)) if (!fireEvent(currentFocusedElement, 'enter-up')) {
-        preventDefault(evt);
-      }
-    }
-  };
-
-  var onFocus = function onFocus(evt) {
-    var target = evt.target;
-
-    if (target !== window && target !== document && _sectionCount && !_duringFocusChange) {
-      var sectionId = getSectionId(target);
-      if (sectionId) {
-        if (_pause) {
-          focusChanged(target, sectionId);
-          return;
-        }
-
-        var focusProperties = {
-          sectionId: sectionId,
-          native: true
-        };
-
-        var willfocusSuccess = fireEvent(target, 'willfocus', focusProperties);
-        if (willfocusSuccess) {
-          fireEvent(target, 'focused', focusProperties, false);
-          focusChanged(target, sectionId);
-        } else {
-          _duringFocusChange = true;
-          target.blur();
-          _duringFocusChange = false;
-        }
-      }
-    }
-  };
-
-  var onBlur = function onBlur(evt) {
-    var target = evt.target;
-
-    if (target !== window && target !== document && !_pause && _sectionCount && !_duringFocusChange && getSectionId(target)) {
-      var unfocusProperties = { native: true };
-      var willunfocusSuccess = fireEvent(target, 'willunfocus', unfocusProperties);
-      if (willunfocusSuccess) {
-        fireEvent(target, 'unfocused', unfocusProperties, false);
-      } else {
-        _duringFocusChange = true;
-        setTimeout(function () {
-          target.focus();
-          _duringFocusChange = false;
-        });
-      }
-    }
-  };
 
   /**
-   * Public Function
+   * Private methods
    */
-  var Navigation = {
-    init: function init() {
-      if (!_ready) {
-        window.addEventListener('mouseover', onMouseOver);
-        window.addEventListener('mousedown', onMouseDown);
-        window.addEventListener('keydown', onKeyDown);
-        window.addEventListener('keyup', onKeyUp);
-        window.addEventListener('focus', onFocus, true);
-        window.addEventListener('blur', onBlur, true);
-        _ready = true;
+
+  /**
+   * Events
+   */
+
+  ;
+
+  var _initialiseProps = function _initialiseProps() {
+    var _this = this;
+
+    this.init = function () {
+      if (!_this._ready) {
+        _this.bindEvents();
+        _this._ready = true;
       }
-    },
+      _this.focus();
+    };
 
-    uninit: function uninit() {
-      window.removeEventListener('mouseover', onMouseOver);
-      window.removeEventListener('mousedown', onMouseDown);
-      window.removeEventListener('blur', onBlur, true);
-      window.removeEventListener('focus', onFocus, true);
-      window.removeEventListener('keyup', onKeyUp);
-      window.removeEventListener('keydown', onKeyDown);
-      Navigation.clear();
-      _idPool = 0;
-      _ready = false;
-    },
+    this.destroy = function () {
+      _this.clear();
+      _this.unbindEvents();
+    };
 
-    clear: function clear() {
-      _sections = {};
-      _sectionCount = 0;
-      _defaultSectionId = '';
-      _lastSectionId = '';
-      _duringFocusChange = false;
-    },
+    this.clear = function () {
+      _this._ready = false;
+      _this._sections = {};
+      _this._sectionCount = 0;
+      _this._idPool = 0;
+      _this._defaultSectionId = '';
+      _this._lastSectionId = '';
+      _this._duringFocusChange = false;
+      _this._focusedPath = null;
+    };
 
-    // set(<config>)
-    // set(<sectionId>, <config>)
-    set: function set() {
+    this.bindEvents = function () {
+      _this._eventsManager.addListener(window, 'mouseover', _this._onMouseOver);
+      _this._eventsManager.addListener(window, 'mousedown', _this._onMouseDown);
+      _this._eventsManager.addListener(window, 'keydown', _this._onKeyDown);
+      _this._eventsManager.addListener(window, 'keyup', _this._onKeyUp);
+      _this._eventsManager.addListener(window, 'focus', _this._onFocus, true);
+      _this._eventsManager.addListener(window, 'blur', _this._onBlur, true);
+      _this._eventsManager.addListener(document, _this._config.eventPrefix + 'focused', _this._handleFocused);
+    };
+
+    this.unbindEvents = function () {
+      _this._eventsManager.removeListener(window, 'mouseover', _this._onMouseOver);
+      _this._eventsManager.removeListener(window, 'mousedown', _this._onMouseDown);
+      _this._eventsManager.removeListener(window, 'keydown', _this._onKeyDown);
+      _this._eventsManager.removeListener(window, 'keyup', _this._onKeyUp);
+      _this._eventsManager.removeListener(window, 'focus', _this._onFocus, true);
+      _this._eventsManager.removeListener(window, 'blur', _this._onBlur, true);
+      _this._eventsManager.removeListener(document, _this._config.eventPrefix + 'focused', _this._handleFocused);
+    };
+
+    this.set = function () {
+      for (var _len = arguments.length, args = Array(_len), _key = 0; _key < _len; _key++) {
+        args[_key] = arguments[_key];
+      }
+
+      var sectionId = void 0,
+          config = void 0;
+
+      if (_typeof$1(args[0]) === 'object') {
+        config = args[0];
+      } else if (typeof args[0] === 'string' && _typeof$1(args[1]) === 'object') {
+        sectionId = args[0];
+        config = args[1];
+
+        if (!_this._sections[sectionId]) throw new Error('Section ' + sectionId + ' doesn\'t exist!');
+      } else {
+        return;
+      }
+
+      for (var key in config) {
+        if (_this._config[key] !== undefined) if (sectionId) _this._sections[sectionId][key] = config[key];else if (config[key] !== undefined) _this._config[key] = config[key];
+      }
+    };
+
+    this.add = function () {
       for (var _len2 = arguments.length, args = Array(_len2), _key2 = 0; _key2 < _len2; _key2++) {
         args[_key2] = arguments[_key2];
       }
@@ -820,93 +448,63 @@
       var sectionId = void 0,
           config = void 0;
 
-      if (_typeof(args[0]) === 'object') {
+      if (_typeof$1(args[0]) === 'object') {
         config = args[0];
-      } else if (typeof args[0] === 'string' && _typeof(args[1]) === 'object') {
-        sectionId = args[0];
-        config = args[1];
-
-        if (!_sections[sectionId]) throw new Error('Section ' + sectionId + ' doesn\'t exist!');
-      } else {
-        return;
-      }
-
-      for (var key in config) {
-        if (GlobalConfig[key] !== undefined) if (sectionId) _sections[sectionId][key] = config[key];else if (config[key] !== undefined) GlobalConfig[key] = config[key];
-      }
-    },
-
-    // add(<config>)
-    // add(<sectionId>, <config>)
-    add: function add() {
-      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
-        args[_key3] = arguments[_key3];
-      }
-
-      var sectionId = void 0,
-          config = void 0;
-
-      if (_typeof(args[0]) === 'object') {
-        config = args[0];
-      } else if (typeof args[0] === 'string' && _typeof(args[1]) === 'object') {
+      } else if (typeof args[0] === 'string' && _typeof$1(args[1]) === 'object') {
 
         sectionId = args[0];
         config = args[1];
-      }if (!sectionId) sectionId = typeof config.id === 'string' ? config.id : generateId();
+      }if (!sectionId) sectionId = typeof config.id === 'string' ? config.id : _this._generateId();
 
-      if (_sections[sectionId]) throw new Error('Section ' + sectionId + ' has already existed!');
+      if (_this._sections[sectionId]) throw new Error('Section ' + sectionId + ' has already existed!');
 
-      _sections[sectionId] = {};
-      _sectionCount++;
+      _this._sections[sectionId] = {};
+      _this._sectionCount++;
 
-      Navigation.set(sectionId, config);
+      _this.set(sectionId, config);
 
       return sectionId;
-    },
+    };
 
-    remove: function remove(sectionId) {
+    this.remove = function (sectionId) {
       if (!sectionId || typeof sectionId !== 'string') throw new Error('Please assign the "sectionId"!');
 
-      if (_sections[sectionId]) {
-        _sections[sectionId] = undefined;
-        _sections = extend({}, _sections);
-        _sectionCount--;
+      if (_this._sections[sectionId]) {
+        _this._sections[sectionId] = undefined;
+        _this._sections = _extends({}, _this._sections);
+        _this._sectionCount--;
         return true;
       }
       return false;
-    },
+    };
 
-    disable: function disable(sectionId) {
-      if (_sections[sectionId]) {
-        _sections[sectionId].disabled = true;
+    this.disable = function (sectionId) {
+      if (_this._sections[sectionId]) {
+        _this._sections[sectionId].disabled = true;
         return true;
       }
       return false;
-    },
+    };
 
-    enable: function enable(sectionId) {
-      if (_sections[sectionId]) {
-        _sections[sectionId].disabled = false;
+    this.enable = function (sectionId) {
+      if (_this._sections[sectionId]) {
+        _this._sections[sectionId].disabled = false;
         return true;
       }
       return false;
-    },
+    };
 
-    pause: function pause() {
-      _pause = true;
-    },
+    this.pause = function () {
+      _this._pause = true;
+    };
 
-    resume: function resume() {
-      _pause = false;
-    },
+    this.resume = function () {
+      _this._pause = false;
+    };
 
-    // focus([silent])
-    // focus(<sectionId>, [silent])
-    // focus(<extSelector>, [silent])
-    // Note: "silent" is optional and default to false
-    focus: function focus() {
-      for (var _len4 = arguments.length, args = Array(_len4), _key4 = 0; _key4 < _len4; _key4++) {
-        args[_key4] = arguments[_key4];
+    this.focus = function () {
+      for (var _len3 = arguments.length, args = Array(_len3), _key3 = 0; _key3 < _len3; _key3++) {
+        args[_key3] = arguments[_key3];
       }
 
       var element = args[0],
@@ -917,35 +515,33 @@
         element = undefined;
       }
 
-      var autoPause = !_pause && silent;
+      var autoPause = !_this._pause && silent;
 
-      if (autoPause) Navigation.pause();
+      if (autoPause) _this.pause();
 
       var result = void 0;
       if (element) {
         if (typeof element === 'string') {
-          result = _sections[element] ? focusSection(element) : focusExtendedSelector(element);
+          result = _this._sections[element] ? _this._focusSection(element) : _this._focusExtendedSelector(element);
         } else {
-          var nextSectionId = getSectionId(element);
-          if (isNavigable(element, nextSectionId)) result = focusElement(element, nextSectionId);
+          var nextSectionId = _this._getSectionId(element);
+          if (_this._isNavigable(element, nextSectionId)) result = _this._focusElement(element, nextSectionId);
         }
-      } else result = focusSection();
+      } else result = _this._focusSection();
 
-      if (autoPause) Navigation.resume();
+      if (autoPause) _this.resume();
 
       return result;
-    },
+    };
 
-    // move(<direction>)
-    // move(<direction>, <selector>)
-    move: function move(dir, selector) {
+    this.move = function (dir, selector) {
       var direction = dir.toLowerCase();
-      if (!REVERSE[direction]) return false;
+      if (!getReverse(direction)) return false;
 
-      var element = selector ? parseSelector(selector)[0] : getCurrentFocusedElement();
+      var element = selector ? parseSelector(selector)[0] : _this._getCurrentFocusedElement();
       if (!element) return false;
 
-      var sectionId = getSectionId(element);
+      var sectionId = _this._getSectionId(element);
       if (!sectionId) return false;
 
       var willmoveProperties = {
@@ -954,116 +550,527 @@
         cause: 'api'
       };
 
-      if (!fireEvent(element, 'willmove', willmoveProperties)) return false;
+      if (!_this._eventsManager.fireEvent(element, 'willmove', willmoveProperties)) return false;
 
-      return focusNext(direction, element, sectionId);
-    },
+      return _this._focusNext(direction, element, sectionId);
+    };
 
-    // makeFocusable()
-    // makeFocusable(<sectionId>)
-    makeFocusable: function makeFocusable(sectionId) {
+    this.addFocusable = function (config, onEnterPressHandler) {
+      if (!config || _this._getSectionId(document.getElementById(config.id))) return;
+
+      _this.removeFocusable(config);
+
+      var sectionId = _this.add(config);
+
+      if (onEnterPressHandler) _this._eventsManager.addListener(config.selector, _this._config.eventPrefix + 'enter-down', onEnterPressHandler);
+
+      _this._makeFocusable(sectionId);
+    };
+
+    this.removeFocusable = function (config, onEnterPressHandler) {
+      var sectionId = _this._getSectionId(document.getElementById(config.id));
+      if (!sectionId) return;
+
+      _this.remove(sectionId);
+      if (onEnterPressHandler) _this._eventsManager.removeListener(_this._config.eventPrefix + 'enter-down', onEnterPressHandler);
+    };
+
+    this.setDefaultSection = function (sectionId) {
+      if (sectionId) {
+        if (_this._sections[sectionId]) _this._defaultSectionId = sectionId;else throw new Error('Section ' + sectionId + ' doesn\'t exist!');
+      } else _this._defaultSectionId = '';
+    };
+
+    this.getCurrentFocusedPath = function () {
+      return _this._focusedPath;
+    };
+
+    this.setCurrentFocusedPath = function (focusPath) {
+      _this._focusedPath = focusPath;
+      _this.focus(focusPath);
+    };
+
+    this._makeFocusable = function (sectionId) {
       var doMakeFocusable = function doMakeFocusable(section) {
-        var tabIndexIgnoreList = section.tabIndexIgnoreList || GlobalConfig.tabIndexIgnoreList;
+        var tabIndexIgnoreList = section.tabIndexIgnoreList || _this._config.tabIndexIgnoreList;
         parseSelector(section.selector).forEach(function (element) {
           if (!matchSelector(element, tabIndexIgnoreList)) if (!element.getAttribute('tabindex')) element.setAttribute('tabindex', '-1');
         });
       };
 
       if (sectionId) {
-        if (_sections[sectionId]) doMakeFocusable(_sections[sectionId]);else throw new Error('Section ' + sectionId + ' doesn\'t exist!');
-      } else for (var id in _sections) {
-        doMakeFocusable(_sections[id]);
-      }
-    },
-
-    setDefaultSection: function setDefaultSection(sectionId) {
-      if (sectionId) {
-        if (_sections[sectionId]) _defaultSectionId = sectionId;else throw new Error('Section ' + sectionId + ' doesn\'t exist!');
-      } else _defaultSectionId = '';
-    },
-
-    getSectionId: getSectionId
-  };
-
-  function _classCallCheck$1(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
-
-  var TVNavigation = function TVNavigation() {
-    var _this = this;
-
-    _classCallCheck$1(this, TVNavigation);
-
-    this.init = function () {
-      Navigation.init();
-      Navigation.focus();
-      _this.bindFocusEvent();
-    };
-
-    this.destroy = function () {
-      _this.focusedPath = null;
-
-      Navigation.uninit();
-      _this.unbindFocusEvent();
-    };
-
-    this.bindFocusEvent = function () {
-      if (!_this.listening) {
-        _this.listening = true;
-        document.addEventListener('sn:focused', _this.handleFocused);
+        if (_this._sections[sectionId]) doMakeFocusable(_this._sections[sectionId]);else throw new Error('Section ' + sectionId + ' doesn\'t exist!');
+      } else for (var id in _this._sections) {
+        doMakeFocusable(_this._sections[id]);
       }
     };
 
-    this.unbindFocusEvent = function () {
-      document.removeEventListener('sn:focused', _this.handleFocused);
-      _this.listening = false;
-    };
+    this._navigate = function (target, direction, candidates, config) {
+      if (!target || !direction || !candidates || !candidates.length) return null;
 
-    this.handleFocused = function (ev) {
-      if (_this.focusedPath !== ev.detail.sectionId) _this.setCurrentFocusedPath(ev.detail.sectionId);
-    };
+      var targetRect = getRect(target);
+      if (!targetRect) return null;
 
-    this.getCurrentFocusedPath = function () {
-      return _this.focusedPath;
-    };
-
-    this.setCurrentFocusedPath = function (focusPath) {
-      _this.focusedPath = focusPath;
-      Navigation.focus(focusPath);
-    };
-
-    this.addEventListener = function (selector, event, fn) {
-      document.querySelectorAll(selector).forEach(function (elem) {
-        return elem.addEventListener(event, fn);
+      var rects = [];
+      candidates.forEach(function (candidate) {
+        var rect = getRect(candidate);
+        if (rect) rects.push(rect);
       });
-      return _this;
+
+      if (!rects.length) return null;
+
+      var distanceFunction = generateDistanceFunction(targetRect);
+
+      var priorities = void 0;
+
+      switch (direction) {
+        case 'left':
+          rects = rects.filter(function (element) {
+            return element.center.x < targetRect.center.x;
+          });
+          priorities = [{
+            group: rects,
+            distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
+          }];
+          break;
+        case 'right':
+          rects = rects.filter(function (element) {
+            return element.center.x > targetRect.center.x;
+          });
+          priorities = [{
+            group: rects,
+            distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
+          }];
+          break;
+        case 'up':
+          rects = rects.filter(function (element) {
+            return element.center.y < targetRect.center.y;
+          });
+          priorities = [{
+            group: rects,
+            distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
+          }];
+          break;
+        case 'down':
+          rects = rects.filter(function (element) {
+            return element.center.y > targetRect.center.y;
+          });
+          priorities = [{
+            group: rects,
+            distance: [distanceFunction.nearestIsBetter, distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter, distanceFunction.nearTargetLeftIsBetter]
+          }];
+          break;
+        default:
+          return null;
+      }
+
+      if (config.straightOnly) priorities.pop();
+
+      var destGroup = prioritize(priorities);
+      if (!destGroup) return null;
+
+      var dest = void 0;
+      if (config.rememberSource && config.previous && config.previous.destination === target && config.previous.reverse === direction) for (var destination in destGroup) {
+        if (destination.element === config.previous.target) {
+          dest = destination.element;
+          break;
+        }
+      }if (!dest) dest = destGroup[0].element;
+
+      return dest;
     };
 
-    this.addFocusable = function (config, onEnterPressHandler) {
-      if (!config || Navigation.getSectionId(document.getElementById(config.id))) return;
+    this._isNavigable = function (element, sectionId, verifySectionSelector) {
+      if (!element || !sectionId || !_this._sections[sectionId] || _this._sections[sectionId].disabled) return false;
 
-      _this.removeFocusable(config);
+      if (element.offsetWidth <= 0 && element.offsetHeight <= 0 || element.hasAttribute('disabled')) return false;
 
-      var sectionId = Navigation.add(config);
+      if (verifySectionSelector && !matchSelector(element, _this._sections[sectionId].selector)) return false;
 
-      if (onEnterPressHandler) _this.addEventListener(config.selector, 'sn:enter-down', onEnterPressHandler);
-
-      Navigation.makeFocusable(sectionId);
+      if (typeof _this._sections[sectionId].navigableFilter === 'function') {
+        if (_this._sections[sectionId].navigableFilter(element, sectionId) === false) return false;
+      } else if (typeof _this._config.navigableFilter === 'function') {
+        if (_this._config.navigableFilter(element, sectionId) === false) return false;
+      }
+      return true;
     };
 
-    this.removeFocusable = function (config) {
-      var sectionId = Navigation.getSectionId(document.getElementById(config.id));
-      if (!sectionId) return;
+    this._focusNext = function (direction, currentFocusedElement, currentSectionId) {
+      var extSelector = currentFocusedElement.getAttribute('data-sn-' + direction);
+      if (typeof extSelector === 'string') {
+        if (extSelector === '' || !_this._focusExtendedSelector(extSelector, direction)) {
+          _this._fireNavigateFailed(currentFocusedElement, direction);
+          return false;
+        }
+        return true;
+      }
 
-      Navigation.remove(sectionId);
-      document.querySelectorAll(config.selector).removeEventListener('sn:enter-down');
+      var sectionNavigableElements = {};
+      var allNavigableElements = [];
+      for (var id in _this._sections) {
+        sectionNavigableElements[id] = _this._getSectionNavigableElements(id);
+        allNavigableElements = allNavigableElements.concat(sectionNavigableElements[id]);
+      }
+
+      var config = _extends({}, _this._config, _this._sections[currentSectionId]);
+      var next = void 0,
+          candidates = void 0;
+
+      if (config.restrict === 'self-only' || config.restrict === 'self-first') {
+        var currentSectionNavigableElements = sectionNavigableElements[currentSectionId];
+        candidates = exclude(currentSectionNavigableElements, currentFocusedElement);
+        next = _this._navigate(currentFocusedElement, direction, candidates, config);
+
+        if (!next && config.restrict === 'self-first') {
+          candidates = exclude(allNavigableElements, currentSectionNavigableElements);
+          next = _this._navigate(currentFocusedElement, direction, candidates, config);
+        }
+      } else {
+        candidates = exclude(allNavigableElements, currentFocusedElement);
+        next = _this._navigate(currentFocusedElement, direction, candidates, config);
+      }
+
+      if (next) {
+        _this._sections[currentSectionId].previous = {
+          target: currentFocusedElement,
+          destination: next,
+          reverse: getReverse(direction)
+        };
+
+        var nextSectionId = _this._getSectionId(next);
+
+        if (currentSectionId !== nextSectionId) {
+          var result = _this._gotoLeaveFor(currentSectionId, direction);
+          if (result) {
+            return true;
+          } else if (result === null) {
+            _this._fireNavigateFailed(currentFocusedElement, direction);
+            return false;
+          }
+
+          var enterToElement = void 0;
+          switch (_this._sections[nextSectionId].enterTo) {
+            case 'last-focused':
+              enterToElement = _this._getSectionLastFocusedElement(nextSectionId) || _this._getSectionDefaultElement(nextSectionId);
+              break;
+            case 'default-element':
+              enterToElement = _this._getSectionDefaultElement(nextSectionId);
+              break;
+          }
+          if (enterToElement) next = enterToElement;
+        }
+        return _this._focusElement(next, nextSectionId, direction);
+      } else if (_this._gotoLeaveFor(currentSectionId, direction)) {
+        return true;
+      }
+
+      _this._fireNavigateFailed(currentFocusedElement, direction);
+      return false;
     };
 
-    this.destroy();
+    this._focusChanged = function (element, sectionId) {
+      var section = sectionId || _this._getSectionId(element);
+
+      if (section) {
+        _this._sections[section].lastFocusedElement = element;
+        _this._lastSectionId = section;
+      }
+    };
+
+    this._focusElement = function (element, sectionId, direction) {
+      if (!element) return false;
+
+      var currentFocusedElement = _this._getCurrentFocusedElement();
+
+      var silentFocus = function silentFocus() {
+        if (currentFocusedElement) currentFocusedElement.blur();
+
+        element.focus();
+        _this._focusChanged(element, sectionId);
+      };
+
+      if (_this._duringFocusChange) {
+        silentFocus();
+        return true;
+      }
+
+      _this._duringFocusChange = true;
+
+      if (_this._pause) {
+        silentFocus();
+        _this._duringFocusChange = false;
+        return true;
+      }
+
+      if (currentFocusedElement) {
+        var unfocusProperties = {
+          nextElement: element,
+          nextSectionId: sectionId,
+          direction: direction,
+          native: false
+        };
+        if (!_this._eventsManager.fireEvent(currentFocusedElement, 'willunfocus', unfocusProperties)) {
+          _this._duringFocusChange = false;
+          return false;
+        }
+        currentFocusedElement.blur();
+        _this._eventsManager.fireEvent(currentFocusedElement, 'unfocused', unfocusProperties, false);
+      }
+
+      var focusProperties = {
+        previousElement: currentFocusedElement,
+        sectionId: sectionId,
+        direction: direction,
+        native: false
+      };
+
+      if (!_this._eventsManager.fireEvent(element, 'willfocus', focusProperties)) {
+        _this._duringFocusChange = false;
+        return false;
+      }
+
+      element.focus();
+      _this._eventsManager.fireEvent(element, 'focused', focusProperties, false);
+
+      _this._duringFocusChange = false;
+
+      _this.focusChanged(element, sectionId);
+      return true;
+    };
+
+    this._focusSection = function (sectionId) {
+      var range = [];
+      var addRange = function addRange(id) {
+        if (id && range.indexOf(id) < 0 && _this._sections[id] && !_this._sections[id].disabled) range.push(id);
+      };
+
+      if (sectionId) {
+        addRange(sectionId);
+      } else {
+        addRange(_this._defaultSectionId);
+        addRange(_this._lastSectionId);
+        Object.keys(_this._sections).map(addRange);
+      }
+
+      for (var i = 0; i < range.length; i++) {
+        var id = range[i];
+        var next = void 0;
+
+        if (_this._sections[id].enterTo === 'last-focused') next = _this._getSectionLastFocusedElement(id) || _this._getSectionDefaultElement(id) || _this._getSectionNavigableElements(id)[0];else next = _this._getSectionDefaultElement(id) || _this._getSectionLastFocusedElement(id) || _this._getSectionNavigableElements(id)[0];
+
+        if (next) return _this._focusElement(next, id);
+      }
+
+      return false;
+    };
+
+    this._focusExtendedSelector = function (selector, direction) {
+      if (selector.charAt(0) === '@') {
+        if (selector.length === 1) return _this._focusSection();
+        var sectionId = selector.substr(1);
+        return _this._focusSection(sectionId);
+      }
+
+      var _parseSelector = parseSelector(selector),
+          _parseSelector2 = _slicedToArray(_parseSelector, 1),
+          next = _parseSelector2[0];
+
+      if (next) {
+        var nextSectionId = _this._getSectionId(next);
+        if (_this._isNavigable(next, nextSectionId)) return _this._focusElement(next, nextSectionId, direction);
+      }
+      return false;
+    };
+
+    this._getSectionId = function (element) {
+      for (var id in _this._sections) {
+        if (!_this._sections[id].disabled && element && matchSelector(element, _this._sections[id].selector)) return id;
+      }
+    };
+
+    this._getSectionNavigableElements = function (sectionId) {
+      return parseSelector(_this._sections[sectionId].selector).filter(function (element) {
+        return _this._isNavigable(element, sectionId);
+      });
+    };
+
+    this._getSectionDefaultElement = function (sectionId) {
+      var defaultElement = _this._sections[sectionId].defaultElement;
+
+      if (!defaultElement) return null;
+
+      if (typeof defaultElement === 'string') {
+
+        var _parseSelector3 = parseSelector(defaultElement);
+
+        var _parseSelector4 = _slicedToArray(_parseSelector3, 1);
+
+        defaultElement = _parseSelector4[0];
+      }if (_this._isNavigable(defaultElement, sectionId, true)) return defaultElement;
+
+      return null;
+    };
+
+    this._getSectionLastFocusedElement = function (sectionId) {
+      var lastFocusedElement = _this._sections[sectionId] && _this._sections[sectionId].lastFocusedElement;
+      if (!_this._isNavigable(lastFocusedElement, sectionId, true)) return null;
+
+      return lastFocusedElement;
+    };
+
+    this._getCurrentFocusedElement = function () {
+      var _document = document,
+          activeElement = _document.activeElement;
+
+      if (activeElement && activeElement !== document.body) return activeElement;
+    };
+
+    this._fireNavigateFailed = function (element, direction) {
+      return _this._eventsManager.fireEvent(element, 'navigatefailed', { direction: direction }, false);
+    };
+
+    this._gotoLeaveFor = function (sectionId, direction) {
+      if (_this._sections[sectionId].leaveFor && _this._sections[sectionId].leaveFor[direction] !== undefined) {
+        var next = _this._sections[sectionId].leaveFor[direction];
+
+        if (typeof next === 'string') {
+          if (next === '') return null;
+
+          return _this._focusExtendedSelector(next, direction);
+        }
+
+        var nextSectionId = _this._getSectionId(next);
+        if (_this._isNavigable(next, nextSectionId)) return _this._focusElement(next, nextSectionId, direction);
+      }
+      return false;
+    };
+
+    this._generateId = function () {
+      var id = void 0;
+      do {
+        id = _this._config.idPoolPrefix + String(++_this._idPool);
+      } while (_this._sections[id]);
+      return id;
+    };
+
+    this._onMouseOver = function (evt) {
+      var target = evt.target;
+
+      if (!target || !target.classList.contains('focusable') && !target.closest('.focusable')) return;
+
+      var element = target.classList.contains('focusable') ? target : target.closest('.focusable');
+
+      _this.focusElement(element, _this._getSectionId(element));
+
+      return preventDefault(evt);
+    };
+
+    this._onMouseDown = function (evt) {
+      var target = evt.target;
+
+      if (!target || !target.classList.contains('focusable') && !target.closest('.focusable')) return;
+
+      var element = target.classList.contains('focusable') ? target : target.closest('.focusable');
+
+      if (!_this._eventsManager.fireEvent(element, 'enter-down')) return preventDefault(evt);
+    };
+
+    this._onKeyDown = function (evt) {
+      if (!_this._sectionCount || _this._pause || evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey) return;
+
+      var currentFocusedElement = _this._getCurrentFocusedElement();
+      var currentSectionId = _this._getSectionId(currentFocusedElement);
+      var keyMappping = getKeyMapping(evt.keyCode);
+
+      if (!keyMappping) return;
+
+      if (keyMappping === 'enter') if (currentFocusedElement && currentSectionId) if (!_this._eventsManager.fireEvent(currentFocusedElement, 'enter-down')) return preventDefault(evt);
+
+      if (!currentFocusedElement) {
+        if (_this._lastSectionId) currentFocusedElement = _this._getSectionLastFocusedElement(_this._lastSectionId);
+
+        if (!currentFocusedElement) {
+          _this.focusSection();
+          return preventDefault(evt);
+        }
+      }
+
+      if (!currentSectionId) return;
+
+      var willmoveProperties = {
+        direction: keyMappping,
+        sectionId: currentSectionId,
+        cause: 'keydown'
+      };
+
+      if (_this._eventsManager.fireEvent(currentFocusedElement, 'willmove', willmoveProperties)) _this._focusNext(keyMappping, currentFocusedElement, currentSectionId);
+
+      return preventDefault(evt);
+    };
+
+    this._onKeyUp = function (evt) {
+      if (evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey) return;
+
+      if (!_this._pause && _this._sectionCount && getKeyMapping(evt.keyCode) === 'center') {
+        var currentFocusedElement = _this._getCurrentFocusedElement();
+        if (currentFocusedElement && _this._getSectionId(currentFocusedElement)) if (!_this._eventsManager.fireEvent(currentFocusedElement, 'enter-up')) {
+          preventDefault(evt);
+        }
+      }
+    };
+
+    this._onFocus = function (evt) {
+      var target = evt.target;
+
+      if (target !== window && target !== document && _this._sectionCount && !_this._duringFocusChange) {
+        var sectionId = _this._getSectionId(target);
+        if (sectionId) {
+          if (_this._pause) {
+            _this._focusChanged(target, sectionId);
+            return;
+          }
+
+          var focusProperties = {
+            sectionId: sectionId,
+            native: true
+          };
+
+          var willfocusSuccess = _this._eventsManager.fireEvent(target, 'willfocus', focusProperties);
+          if (willfocusSuccess) {
+            _this._eventsManager.fireEvent(target, 'focused', focusProperties, false);
+            _this._focusChanged(target, sectionId);
+          } else {
+            _this._duringFocusChange = true;
+            target.blur();
+            _this._duringFocusChange = false;
+          }
+        }
+      }
+    };
+
+    this._onBlur = function (evt) {
+      var target = evt.target;
+
+      if (target !== window && target !== document && !_this._pause && _this._sectionCount && !_this._duringFocusChange && _this._getSectionId(target)) {
+        var unfocusProperties = { native: true };
+        var willunfocusSuccess = _this._eventsManager.fireEvent(target, 'willunfocus', unfocusProperties);
+        if (willunfocusSuccess) {
+          _this._eventsManager.fireEvent(target, 'unfocused', unfocusProperties, false);
+        } else {
+          _this._duringFocusChange = true;
+          setTimeout(function () {
+            target.focus();
+            _this._duringFocusChange = false;
+          });
+        }
+      }
+    };
+
+    this._handleFocused = function (event) {
+      if (_this._focusedPath !== event.detail.sectionId) _this.setCurrentFocusedPath(event.detail.sectionId);
+    };
   };
 
-  var TVNavigation$1 = new TVNavigation();
-
-  var index = { TVNavigation: TVNavigation$1 };
-
-  return index;
+  return Navigator;
 
 })));
