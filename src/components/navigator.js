@@ -9,6 +9,7 @@
  * Inspired on luke-chang/js-spatial-navigation
  */
 
+import '../misc/polyfills'
 import EventsManager from './events-manager'
 import { getRect, generateDistanceFunction, prioritize } from './core-functions'
 import { getKeyMapping } from '../misc/key-mapping'
