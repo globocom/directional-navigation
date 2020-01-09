@@ -1,4 +1,4 @@
-import MinkowskiDistance from '../src/minkowski-distance'
+import MinkowskiDistance from './minkowski-distance'
 
 describe('MinkowskiDistance', () => {
   describe('on calculating distance using minkowski distance', () => {
