@@ -6,7 +6,7 @@
   "scripts": {
     "build": "rollup -c",
     "watch": "rollup -c --watch",
-    "test": "jest",
+    "test": "jest --coverage",
     "lint": "eslint *.js src/",
     "lint:fix": "npm run lint -- --fix",
     "start": "rollup -c rollup.config.dev.js"
