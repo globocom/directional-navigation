@@ -1,5 +1,3 @@
-
-(function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.head.appendChild(r) })(window.document);
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
@@ -133,7 +131,7 @@
           d = 0;
           for (i = 0; i < lx; i += 1) {
             d += Math.pow(Math.abs(x[i] - y[i]), p);
-          }return isNaN(d) ? 0 : Math.pow(d, 1 / p);
+          }return Math.pow(d, 1 / p);
         }
       }
     }, {
