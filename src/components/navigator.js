@@ -721,19 +721,14 @@ export default class Navigator {
    */
 
   _onMouseClick(evt) {
-    try {
-      const { target } = evt
-      console.log('>>>>> _onMouseClick ', target)
+    const { target } = evt
+    if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
+      return
 
-      if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
-        return
+    const element = target.classList.contains('focusable') ? target : target.closest('.focusable')
 
-      const element = target.classList.contains('focusable') ? target : target.closest('.focusable')
+    Navigator._focusElement(element, Navigator._getSectionId(element))
 
-      Navigator._focusElement(element, Navigator._getSectionId(element))
-    } catch (err) {
-      console.log(err)
-    }
     return preventDefault(evt)
   }
 

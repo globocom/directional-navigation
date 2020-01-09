@@ -18,13 +18,12 @@ export const parseSelector = selector => {
 }
 
 export const matchSelector = (element, selector) => {
-  if (typeof selector === 'string') {
+  if (typeof selector === 'string')
     return element.matches(selector)
-  } else if (typeof selector === 'object' && selector.length) {
+  else if (typeof selector === 'object' && selector.length)
     return selector.indexOf(element) >= 0
-  } else if (typeof selector === 'object' && selector.nodeType === 1) {
+  else if (typeof selector === 'object' && selector.nodeType === 1)
     return element === selector
-  }
   return false
 }
 
