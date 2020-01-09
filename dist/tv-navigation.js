@@ -1,8 +1,27 @@
+
+(function(l, r) { if (l.getElementById('livereloadscript')) return; r = l.createElement('script'); r.async = 1; r.src = '//' + (window.location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; r.id = 'livereloadscript'; l.head.appendChild(r) })(window.document);
 (function (global, factory) {
   typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
   typeof define === 'function' && define.amd ? define(factory) :
   (global = global || self, global.TVNavigation = factory());
 }(this, (function () { 'use strict';
+
+  if (!Element.prototype.matches) Element.prototype.matches = Element.prototype.matchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.msMatchesSelector || Element.prototype.oMatchesSelector || Element.prototype.webkitMatchesSelector || function (s) {
+    var matches = (this.document || this.ownerDocument).querySelectorAll(s);
+    var i = matches.length;
+    while (--i >= 0 && matches.item(i) !== this) {/* do nothing */}
+    return i > -1;
+  };
+
+  if (!Element.prototype.closest) Element.prototype.closest = function (s) {
+    var el = this;
+    if (!document.documentElement.contains(el)) return null;
+    do {
+      if (el.matches(s)) return el;
+      el = el.parentElement;
+    } while (el !== null);
+    return null;
+  };
 
   var _createClass = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
 
@@ -276,13 +295,7 @@
   };
 
   var matchSelector = function matchSelector(element, selector) {
-    if (typeof selector === 'string') {
-      return element.matches(selector);
-    } else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.length) {
-      return selector.indexOf(element) >= 0;
-    } else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.nodeType === 1) {
-      return element === selector;
-    }
+    if (typeof selector === 'string') return element.matches(selector);else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.length) return selector.indexOf(element) >= 0;else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.nodeType === 1) return element === selector;
     return false;
   };
 
@@ -377,9 +390,9 @@
     }, {
       key: 'bindEvents',
       value: function bindEvents() {
-        this.addEventListener(window, 'click', this._onMouseClick);
+        this.addEventListener(window, 'click', this._onMouseClickOrDown);
         this.addEventListener(window, 'mouseover', this._onMouseOver);
-        this.addEventListener(window, 'mousedown', this._onMouseDown);
+        this.addEventListener(window, 'mousedown', this._onMouseClickOrDown);
         this.addEventListener(window, 'keydown', this._onKeyDown);
         this.addEventListener(window, 'keyup', this._onKeyUp);
         this.addEventListener(window, 'focus', this._onFocus, true);
@@ -389,9 +402,9 @@
     }, {
       key: 'unbindEvents',
       value: function unbindEvents() {
-        this.removeEventListener(window, 'click', this._onMouseClick);
+        this.removeEventListener(window, 'click', this._onMouseClickOrDown);
         this.removeEventListener(window, 'mouseover', this._onMouseOver);
-        this.removeEventListener(window, 'mousedown', this._onMouseDown);
+        this.removeEventListener(window, 'mousedown', this._onMouseClickOrDown);
         this.removeEventListener(window, 'keydown', this._onKeyDown);
         this.removeEventListener(window, 'keyup', this._onKeyUp);
         this.removeEventListener(window, 'focus', this._onFocus, true);
@@ -478,31 +491,13 @@
         }
       }
     }, {
-      key: '_onMouseClick',
+      key: '_onMouseOver',
 
 
       /**
        * Events
        */
 
-      value: function _onMouseClick(evt) {
-        try {
-          var target = evt.target;
-
-          console.log('>>>>> _onMouseClick ', target);
-
-          if (!target || !target.classList.contains('focusable') && !target.closest('.focusable')) return;
-
-          var element = target.classList.contains('focusable') ? target : target.closest('.focusable');
-
-          Navigator._focusElement(element, Navigator._getSectionId(element));
-        } catch (err) {
-          console.log(err);
-        }
-        return preventDefault(evt);
-      }
-    }, {
-      key: '_onMouseOver',
       value: function _onMouseOver(evt) {
         var target = evt.target;
 
@@ -515,8 +510,8 @@
         return preventDefault(evt);
       }
     }, {
-      key: '_onMouseDown',
-      value: function _onMouseDown(evt) {
+      key: '_onMouseClickOrDown',
+      value: function _onMouseClickOrDown(evt) {
         var target = evt.target;
 
         if (!target || !target.classList.contains('focusable') && !target.closest('.focusable')) return;
@@ -822,9 +817,7 @@
             });
             priorities = [{
               group: rects,
-              distance: [
-              // distanceFunction.nearHorizonIsBetter,
-              distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
+              distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
             }];
             break;
           case 'right':
@@ -833,9 +826,7 @@
             });
             priorities = [{
               group: rects,
-              distance: [
-              // distanceFunction.nearHorizonIsBetter,
-              distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
+              distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
             }];
             break;
           case 'up':
@@ -1166,23 +1157,6 @@
 
     return Navigator;
   }();
-
-  if (!Element.prototype.matches) Element.prototype.matches = Element.prototype.matchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.msMatchesSelector || Element.prototype.oMatchesSelector || Element.prototype.webkitMatchesSelector || function (s) {
-    var matches = (this.document || this.ownerDocument).querySelectorAll(s);
-    var i = matches.length;
-    while (--i >= 0 && matches.item(i) !== this) {}
-    return i > -1;
-  };
-
-  if (!Element.prototype.closest) Element.prototype.closest = function (s) {
-    var el = this;
-    if (!document.documentElement.contains(el)) return null;
-    do {
-      if (el.matches(s)) return el;
-      el = el.parentElement;
-    } while (el !== null);
-    return null;
-  };
 
   return Navigator;
 
