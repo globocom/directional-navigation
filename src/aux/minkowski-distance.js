@@ -49,9 +49,7 @@ class MinkowskiDistance {
       for (i = 0; i < lx; i += 1)
         d += Math.pow(Math.abs(x[i] - y[i]), p)
 
-      return isNaN(d)
-        ? 0
-        : Math.pow(d, 1 / p)
+      return Math.pow(d, 1 / p)
     }
   }
 
