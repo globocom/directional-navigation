@@ -20,10 +20,14 @@
         <div class="icon focusable" id="apple"><i class="fa fa-apple"></i></div> 
       </div>
     </div>
-    <!-- <script async src="http://weinre.gcloud.globoi.com/target/target-script-min.js#vitor"></script> -->
+    <script async src="http://weinre.gcloud.globoi.com/target/target-script-min.js#vitor"></script>
 
     <script>
-    const navigation = new Navigator({})
+        setTimeout(function() {
+            console.log('>>> init')
+        }, 3000)
+        try {
+    const navigation = new TVNavigation()
 
     // Initialize
     navigation.init()
@@ -37,10 +41,17 @@
     enterTo: '',
     })
 
-    navigation.addEventListener('#middlebox .focusable', 'sn:enter-down', evt => evt.target.classList.add('active'))
+    navigation.addEventListener('#middlebox .focusable', 'sn:enter-down', function(evt) { 
+        evt.target.classList.add('active')
+    })
 
     // Focus section "middlebox" by default.
     navigation.setCurrentFocusedPath('middlebox')
+        } catch(err) {
+            setTimeout(function() {
+            console.log('>>> erro', err)
+        }, 3000)
+        }
     </script>
   </body>
 </html>

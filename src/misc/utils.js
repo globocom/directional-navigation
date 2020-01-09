@@ -30,7 +30,8 @@ export const matchSelector = (element, selector) => {
 }
 
 export const exclude = (elemList, excludedElem) => {
-  for (const element in Array.from(excludedElem)) {
+  const arr = new Array(excludedElem)
+  for (const element in arr) {
     const index = elemList.indexOf(element)
     if (index >= 0)
       elemList.splice(index, 1)
