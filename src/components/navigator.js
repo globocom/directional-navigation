@@ -77,6 +77,7 @@ export default class Navigator {
   }
 
   bindEvents() {
+    this.addEventListener(window, 'click', this._onMouseClick)
     this.addEventListener(window, 'mouseover', this._onMouseOver)
     this.addEventListener(window, 'mousedown', this._onMouseDown)
     this.addEventListener(window, 'keydown', this._onKeyDown)
@@ -87,6 +88,7 @@ export default class Navigator {
   }
 
   unbindEvents() {
+    this.removeEventListener(window, 'click', this._onMouseClick)
     this.removeEventListener(window, 'mouseover', this._onMouseOver)
     this.removeEventListener(window, 'mousedown', this._onMouseDown)
     this.removeEventListener(window, 'keydown', this._onKeyDown)
@@ -718,6 +720,23 @@ export default class Navigator {
    * Events
    */
 
+  _onMouseClick(evt) {
+    try {
+      const { target } = evt
+      console.log('>>>>> _onMouseClick ', target)
+
+      if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
+        return
+
+      const element = target.classList.contains('focusable') ? target : target.closest('.focusable')
+
+      Navigator._focusElement(element, Navigator._getSectionId(element))
+    } catch (err) {
+      console.log(err)
+    }
+    return preventDefault(evt)
+  }
+
   _onMouseOver(evt) {
     const { target } = evt
     if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
@@ -742,7 +761,6 @@ export default class Navigator {
   }
 
   _onKeyDown(evt) {
-    console.log('>>>> _onKeyDown: ', getKeyMapping(evt.keyCode))
     if (!_sectionCount || _pause || evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
       return
 

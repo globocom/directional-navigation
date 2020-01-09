@@ -261,11 +261,6 @@
     return KEYMAPPING[keyCode];
   };
 
-  var elementMatchesSelector = Element.prototype.matches || Element.prototype.matchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.webkitMatchesSelector || Element.prototype.msMatchesSelector || Element.prototype.oMatchesSelector || function (selector) {
-    var matchedNodes = (this.parentNode || this.document).querySelectorAll(selector);
-    return [].slice.call(matchedNodes).indexOf(this) >= 0;
-  };
-
   var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
 
   var preventDefault = function preventDefault(evt) {
@@ -281,7 +276,13 @@
   };
 
   var matchSelector = function matchSelector(element, selector) {
-    if (typeof selector === 'string') return elementMatchesSelector.call(element, selector);else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.length) return selector.indexOf(element) >= 0;else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.nodeType === 1) return element === selector;
+    if (typeof selector === 'string') {
+      return element.matches(selector);
+    } else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.length) {
+      return selector.indexOf(element) >= 0;
+    } else if ((typeof selector === 'undefined' ? 'undefined' : _typeof(selector)) === 'object' && selector.nodeType === 1) {
+      return element === selector;
+    }
     return false;
   };
 
@@ -376,6 +377,7 @@
     }, {
       key: 'bindEvents',
       value: function bindEvents() {
+        this.addEventListener(window, 'click', this._onMouseClick);
         this.addEventListener(window, 'mouseover', this._onMouseOver);
         this.addEventListener(window, 'mousedown', this._onMouseDown);
         this.addEventListener(window, 'keydown', this._onKeyDown);
@@ -387,6 +389,7 @@
     }, {
       key: 'unbindEvents',
       value: function unbindEvents() {
+        this.removeEventListener(window, 'click', this._onMouseClick);
         this.removeEventListener(window, 'mouseover', this._onMouseOver);
         this.removeEventListener(window, 'mousedown', this._onMouseDown);
         this.removeEventListener(window, 'keydown', this._onKeyDown);
@@ -475,13 +478,31 @@
         }
       }
     }, {
-      key: '_onMouseOver',
+      key: '_onMouseClick',
 
 
       /**
        * Events
        */
 
+      value: function _onMouseClick(evt) {
+        try {
+          var target = evt.target;
+
+          console.log('>>>>> _onMouseClick ', target);
+
+          if (!target || !target.classList.contains('focusable') && !target.closest('.focusable')) return;
+
+          var element = target.classList.contains('focusable') ? target : target.closest('.focusable');
+
+          Navigator._focusElement(element, Navigator._getSectionId(element));
+        } catch (err) {
+          console.log(err);
+        }
+        return preventDefault(evt);
+      }
+    }, {
+      key: '_onMouseOver',
       value: function _onMouseOver(evt) {
         var target = evt.target;
 
@@ -507,7 +528,6 @@
     }, {
       key: '_onKeyDown',
       value: function _onKeyDown(evt) {
-        console.log('>>>> _onKeyDown: ', getKeyMapping(evt.keyCode));
         if (!_sectionCount || _pause || evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey) return;
 
         var currentFocusedElement = Navigator._getCurrentFocusedElement();
@@ -802,7 +822,9 @@
             });
             priorities = [{
               group: rects,
-              distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
+              distance: [
+              // distanceFunction.nearHorizonIsBetter,
+              distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
             }];
             break;
           case 'right':
@@ -811,7 +833,9 @@
             });
             priorities = [{
               group: rects,
-              distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
+              distance: [
+              // distanceFunction.nearHorizonIsBetter,
+              distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
             }];
             break;
           case 'up':
@@ -1142,6 +1166,23 @@
 
     return Navigator;
   }();
+
+  if (!Element.prototype.matches) Element.prototype.matches = Element.prototype.matchesSelector || Element.prototype.mozMatchesSelector || Element.prototype.msMatchesSelector || Element.prototype.oMatchesSelector || Element.prototype.webkitMatchesSelector || function (s) {
+    var matches = (this.document || this.ownerDocument).querySelectorAll(s);
+    var i = matches.length;
+    while (--i >= 0 && matches.item(i) !== this) {}
+    return i > -1;
+  };
+
+  if (!Element.prototype.closest) Element.prototype.closest = function (s) {
+    var el = this;
+    if (!document.documentElement.contains(el)) return null;
+    do {
+      if (el.matches(s)) return el;
+      el = el.parentElement;
+    } while (el !== null);
+    return null;
+  };
 
   return Navigator;
 

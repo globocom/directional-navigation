@@ -1,5 +1,3 @@
-import { elementMatchesSelector } from './polyfills'
-
 export const preventDefault = evt => {
   evt.preventDefault()
   evt.stopPropagation()
@@ -20,12 +18,13 @@ export const parseSelector = selector => {
 }
 
 export const matchSelector = (element, selector) => {
-  if (typeof selector === 'string')
-    return elementMatchesSelector.call(element, selector)
-  else if (typeof selector === 'object' && selector.length)
+  if (typeof selector === 'string') {
+    return element.matches(selector)
+  } else if (typeof selector === 'object' && selector.length) {
     return selector.indexOf(element) >= 0
-  else if (typeof selector === 'object' && selector.nodeType === 1)
+  } else if (typeof selector === 'object' && selector.nodeType === 1) {
     return element === selector
+  }
   return false
 }
 
