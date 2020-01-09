@@ -78,9 +78,9 @@ export default class Navigator {
   }
 
   bindEvents() {
-    this.addEventListener(window, 'click', this._onMouseClick)
+    this.addEventListener(window, 'click', this._onMouseClickOrDown)
     this.addEventListener(window, 'mouseover', this._onMouseOver)
-    this.addEventListener(window, 'mousedown', this._onMouseDown)
+    this.addEventListener(window, 'mousedown', this._onMouseClickOrDown)
     this.addEventListener(window, 'keydown', this._onKeyDown)
     this.addEventListener(window, 'keyup', this._onKeyUp)
     this.addEventListener(window, 'focus', this._onFocus, true)
@@ -89,9 +89,9 @@ export default class Navigator {
   }
 
   unbindEvents() {
-    this.removeEventListener(window, 'click', this._onMouseClick)
+    this.removeEventListener(window, 'click', this._onMouseClickOrDown)
     this.removeEventListener(window, 'mouseover', this._onMouseOver)
-    this.removeEventListener(window, 'mousedown', this._onMouseDown)
+    this.removeEventListener(window, 'mousedown', this._onMouseClickOrDown)
     this.removeEventListener(window, 'keydown', this._onKeyDown)
     this.removeEventListener(window, 'keyup', this._onKeyUp)
     this.removeEventListener(window, 'focus', this._onFocus, true)
@@ -721,18 +721,6 @@ export default class Navigator {
    * Events
    */
 
-  _onMouseClick(evt) {
-    const { target } = evt
-    if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
-      return
-
-    const element = target.classList.contains('focusable') ? target : target.closest('.focusable')
-
-    Navigator._focusElement(element, Navigator._getSectionId(element))
-
-    return preventDefault(evt)
-  }
-
   _onMouseOver(evt) {
     const { target } = evt
     if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
@@ -745,7 +733,7 @@ export default class Navigator {
     return preventDefault(evt)
   }
 
-  _onMouseDown(evt) {
+  _onMouseClickOrDown(evt) {
     const { target } = evt
     if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
       return
