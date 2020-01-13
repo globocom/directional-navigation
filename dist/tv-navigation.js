@@ -221,11 +221,15 @@
     var destPriority = void 0;
 
     for (var i = 0; i < priorities.length; i++) {
-      if (priorities[i].group.length) {
+      var group = priorities[i].group;
+
+      if (group && group.length) {
         destPriority = priorities[i];
         break;
       }
-    }if (!destPriority) return null;
+    }
+
+    if (!destPriority) return null;
 
     var destDistance = destPriority.distance;
 
@@ -239,6 +243,50 @@
     });
 
     return destPriority.group;
+  };
+
+  var calculateAngle = function calculateAngle(cx, cy, ex, ey) {
+    var dy = ey - cy;
+    var dx = ex - cx;
+    var theta = Math.atan2(dy, dx); // range (-PI, PI]
+    theta *= 180 / Math.PI; // rads to degs, range (-180, 180]
+    if (theta < 0) theta = 360 + theta; // range [0, 360)
+    return theta;
+  };
+
+  var isInsideAngle = function isInsideAngle(rect, sourceRect, direction) {
+    var _rect$center = rect.center,
+        rectX = _rect$center.x,
+        rectY = _rect$center.y;
+    var _sourceRect$center = sourceRect.center,
+        sourceX = _sourceRect$center.x,
+        sourceY = _sourceRect$center.y;
+
+
+    var filterAngle = void 0;
+    var distance = calculateAngle(rectX, rectY, sourceX, sourceY);
+    var isInsideAngle = void 0;
+
+    switch (direction) {
+      case 'left':
+        filterAngle = 75;
+        isInsideAngle = distance <= filterAngle / 2 || distance >= 360 - filterAngle / 2;
+        break;
+      case 'right':
+        filterAngle = 75;
+        isInsideAngle = distance >= 180 - filterAngle / 2 && distance <= 180 + filterAngle / 2;
+        break;
+      case 'up':
+        filterAngle = 105;
+        isInsideAngle = distance >= 90 - filterAngle / 2 && distance <= 90 + filterAngle / 2;
+        break;
+      case 'down':
+        filterAngle = 105;
+        isInsideAngle = distance >= 270 - filterAngle / 2 && distance <= 270 + filterAngle / 2;
+        break;
+    }
+
+    return isInsideAngle;
   };
 
   var KEYMAPPING = {
@@ -807,32 +855,41 @@
         var distanceFunction = generateDistanceFunction(targetRect);
 
         var priorities = void 0;
-
+        var rectsByAngle = [];
         switch (direction) {
           case 'left':
             rects = rects.filter(function (element) {
               return element.center.x < targetRect.center.x;
             });
+            rectsByAngle = rects.filter(function (element) {
+              return isInsideAngle(element, targetRect, direction);
+            });
             priorities = [{
-              group: rects,
-              distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
+              group: rectsByAngle.length > 0 ? rectsByAngle : rects,
+              distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.topIsBetter]
             }];
             break;
           case 'right':
             rects = rects.filter(function (element) {
               return element.center.x > targetRect.center.x;
             });
+            rectsByAngle = rects.filter(function (element) {
+              return isInsideAngle(element, targetRect, direction);
+            });
             priorities = [{
-              group: rects,
-              distance: [distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
+              group: rectsByAngle.length > 0 ? rectsByAngle : rects,
+              distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.topIsBetter]
             }];
             break;
           case 'up':
             rects = rects.filter(function (element) {
               return element.center.y < targetRect.center.y;
             });
+            rectsByAngle = rects.filter(function (element) {
+              return isInsideAngle(element, targetRect, direction);
+            });
             priorities = [{
-              group: rects,
+              group: rectsByAngle.length > 0 ? rectsByAngle : rects,
               distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
             }];
             break;
@@ -840,8 +897,11 @@
             rects = rects.filter(function (element) {
               return element.center.y > targetRect.center.y;
             });
+            rectsByAngle = rects.filter(function (element) {
+              return isInsideAngle(element, targetRect, direction);
+            });
             priorities = [{
-              group: rects,
+              group: rectsByAngle.length > 0 ? rectsByAngle : rects,
               distance: [distanceFunction.nearestIsBetter, distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter, distanceFunction.nearTargetLeftIsBetter]
             }];
             break;
