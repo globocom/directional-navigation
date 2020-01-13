@@ -74,11 +74,13 @@ export const generateDistanceFunction = fromRect => ({
 export const prioritize = priorities => {
   let destPriority
 
-  for (let i = 0; i < priorities.length; i++)
-    if (priorities[i].group.length) {
+  for (let i = 0; i < priorities.length; i++) {
+    const { group } = priorities[i]
+    if (group && group.length) {
       destPriority = priorities[i]
       break
     }
+  }
 
   if (!destPriority)
     return null
@@ -96,4 +98,43 @@ export const prioritize = priorities => {
   })
 
   return destPriority.group
+}
+
+export const calculateAngle = (cx, cy, ex, ey) => {
+  const dy = ey - cy
+  const dx = ex - cx
+  let theta = Math.atan2(dy, dx) // range (-PI, PI]
+  theta *= 180 / Math.PI // rads to degs, range (-180, 180]
+  if (theta < 0) theta = 360 + theta // range [0, 360)
+  return theta
+}
+
+export const isInsideAngle = (rect, sourceRect, direction) => {
+  const { x: rectX, y: rectY } = rect.center
+  const { x: sourceX, y: sourceY } = sourceRect.center
+
+  let filterAngle
+  const distance = calculateAngle(rectX, rectY, sourceX, sourceY)
+  let isInsideAngle
+
+  switch (direction) {
+  case 'left':
+    filterAngle = 75
+    isInsideAngle = distance <= filterAngle / 2 || distance >= (360 - filterAngle / 2)
+    break
+  case 'right':
+    filterAngle = 75
+    isInsideAngle = distance >= (180 - filterAngle / 2) && distance <= (180 + filterAngle / 2)
+    break
+  case 'up':
+    filterAngle = 105
+    isInsideAngle = distance >= (90 - filterAngle / 2) && distance <= (90 + filterAngle / 2)
+    break
+  case 'down':
+    filterAngle = 105
+    isInsideAngle = distance >= (270 - filterAngle / 2) && distance <= (270 + filterAngle / 2)
+    break
+  }
+
+  return isInsideAngle
 }
