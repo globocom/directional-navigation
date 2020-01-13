@@ -11,7 +11,7 @@
 
 import '../misc/polyfills'
 import EventsManager from './events-manager'
-import { getRect, generateDistanceFunction, prioritize } from './core-functions'
+import { getRect, generateDistanceFunction, prioritize, isInsideAngle } from './core-functions'
 import { getKeyMapping } from '../misc/key-mapping'
 import {
   exclude,
@@ -345,16 +345,17 @@ export default class Navigator {
     const distanceFunction = generateDistanceFunction(targetRect)
 
     let priorities
-
+    let rectsByAngle = []
     switch (direction) {
     case 'left':
       rects = rects.filter(element => element.center.x < targetRect.center.x)
+      rectsByAngle = rects.filter(element => isInsideAngle(element, targetRect, direction))
       priorities = [
         {
-          group: rects,
+          group: rectsByAngle.length > 0 ? rectsByAngle : rects,
           distance: [
-            distanceFunction.nearHorizonIsBetter,
             distanceFunction.nearestIsBetter,
+            distanceFunction.nearHorizonIsBetter,
             distanceFunction.topIsBetter,
           ],
         },
@@ -362,12 +363,13 @@ export default class Navigator {
       break
     case 'right':
       rects = rects.filter(element => element.center.x > targetRect.center.x)
+      rectsByAngle = rects.filter(element => isInsideAngle(element, targetRect, direction))
       priorities = [
         {
-          group: rects,
+          group: rectsByAngle.length > 0 ? rectsByAngle : rects,
           distance: [
-            distanceFunction.nearHorizonIsBetter,
             distanceFunction.nearestIsBetter,
+            distanceFunction.nearHorizonIsBetter,
             distanceFunction.topIsBetter,
           ],
         },
@@ -375,9 +377,10 @@ export default class Navigator {
       break
     case 'up':
       rects = rects.filter(element => element.center.y < targetRect.center.y)
+      rectsByAngle = rects.filter(element => isInsideAngle(element, targetRect, direction))
       priorities = [
         {
-          group: rects,
+          group: rectsByAngle.length > 0 ? rectsByAngle : rects,
           distance: [
             distanceFunction.nearestIsBetter,
             distanceFunction.nearHorizonIsBetter,
@@ -388,9 +391,10 @@ export default class Navigator {
       break
     case 'down':
       rects = rects.filter(element => element.center.y > targetRect.center.y)
+      rectsByAngle = rects.filter(element => isInsideAngle(element, targetRect, direction))
       priorities = [
         {
-          group: rects,
+          group: rectsByAngle.length > 0 ? rectsByAngle : rects,
           distance: [
             distanceFunction.nearestIsBetter,
             distanceFunction.nearPlumbLineIsBetter,
