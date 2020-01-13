@@ -23,10 +23,6 @@
     <script async src="http://weinre.gcloud.globoi.com/target/target-script-min.js#vitor"></script>
 
     <script>
-        setTimeout(function() {
-            console.log('>>> init')
-        }, 3000)
-        try {
     const navigation = new TVNavigation()
 
     // Initialize
@@ -34,24 +30,16 @@
 
     // Add the second section "middlebox".
     navigation.addFocusable({
-    id: 'middlebox',
-    selector: '#middlebox .focusable',
-
-    // Focus the last focused element first then entering this section.
-    enterTo: '',
+      id: 'middlebox',
+      selector: '#middlebox .focusable',
+      enterTo: '',
     })
 
     navigation.addEventListener('#middlebox .focusable', 'sn:enter-down', function(evt) { 
-        evt.target.classList.add('active')
+      evt.target.classList.add('active')
     })
 
-    // Focus section "middlebox" by default.
     navigation.setCurrentFocusedPath('middlebox')
-        } catch(err) {
-            setTimeout(function() {
-            console.log('>>> erro', err)
-        }, 3000)
-        }
     </script>
   </body>
 </html>
