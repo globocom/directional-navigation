@@ -4,6 +4,7 @@
   "description": "New JS implementation of Spatial Navigation by Luke Chang",
   "main": "dist/tv-navigation.min.js",
   "scripts": {
+    "prebuild": "rimraf dist",
     "build": "rollup -c",
     "watch": "rollup -c --watch",
     "test": "jest --coverage",
@@ -47,6 +48,7 @@
     "ghooks": "^2.0.4",
     "jest": "^22.4.4",
     "npm-run-all": "^4.1.5",
+    "rimraf": "^3.0.0",
     "rollup": "^1.28.0",
     "rollup-plugin-babel": "^3.0.7",
     "rollup-plugin-commonjs": "^10.1.0",
