@@ -10,7 +10,9 @@ npm install && npm start
 
 #### Todos
 - Improve code coverage 
+- CI
 - Better README
 - Documentation
+- Make angle configurable
 
 #### License by MIT
