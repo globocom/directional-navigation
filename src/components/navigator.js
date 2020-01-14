@@ -341,16 +341,14 @@ export default class Navigator {
       return null
 
     const distanceFunction = generateDistanceFunction(targetRect)
+    rects = rects.filter(rect => rect.element !== targetRect.element && isInsideAngle(rect, targetRect, direction))
 
     let priorities
-    let rectsByAngle = []
     switch (direction) {
     case 'left':
-      rects = rects.filter(element => element.center.x < targetRect.center.x)
-      rectsByAngle = rects.filter(element => isInsideAngle(element, targetRect, direction))
       priorities = [
         {
-          group: rectsByAngle.length > 0 ? rectsByAngle : rects,
+          group: rects,
           distance: [
             distanceFunction.nearestIsBetter,
             distanceFunction.nearHorizonIsBetter,
@@ -360,11 +358,9 @@ export default class Navigator {
       ]
       break
     case 'right':
-      rects = rects.filter(element => element.center.x > targetRect.center.x)
-      rectsByAngle = rects.filter(element => isInsideAngle(element, targetRect, direction))
       priorities = [
         {
-          group: rectsByAngle.length > 0 ? rectsByAngle : rects,
+          group: rects,
           distance: [
             distanceFunction.nearestIsBetter,
             distanceFunction.nearHorizonIsBetter,
@@ -374,11 +370,9 @@ export default class Navigator {
       ]
       break
     case 'up':
-      rects = rects.filter(element => element.center.y < targetRect.center.y)
-      rectsByAngle = rects.filter(element => isInsideAngle(element, targetRect, direction))
       priorities = [
         {
-          group: rectsByAngle.length > 0 ? rectsByAngle : rects,
+          group: rects,
           distance: [
             distanceFunction.nearestIsBetter,
             distanceFunction.nearHorizonIsBetter,
@@ -388,11 +382,9 @@ export default class Navigator {
       ]
       break
     case 'down':
-      rects = rects.filter(element => element.center.y > targetRect.center.y)
-      rectsByAngle = rects.filter(element => isInsideAngle(element, targetRect, direction))
       priorities = [
         {
-          group: rectsByAngle.length > 0 ? rectsByAngle : rects,
+          group: rects,
           distance: [
             distanceFunction.nearestIsBetter,
             distanceFunction.nearPlumbLineIsBetter,
