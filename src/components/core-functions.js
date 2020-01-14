@@ -115,26 +115,19 @@ export const isInsideAngle = (rect, sourceRect, direction) => {
 
   let filterAngle
   const distance = calculateAngle(rectX, rectY, sourceX, sourceY)
-  let isInsideAngle
 
   switch (direction) {
   case 'left':
-    filterAngle = 75
-    isInsideAngle = distance <= filterAngle / 2 || distance >= (360 - filterAngle / 2)
-    break
+    filterAngle = 60
+    return distance <= filterAngle / 2 || distance >= (360 - filterAngle / 2)
   case 'right':
-    filterAngle = 75
-    isInsideAngle = distance >= (180 - filterAngle / 2) && distance <= (180 + filterAngle / 2)
-    break
+    filterAngle = 60
+    return distance >= (180 - filterAngle / 2) && distance <= (180 + filterAngle / 2)
   case 'up':
-    filterAngle = 105
-    isInsideAngle = distance >= (90 - filterAngle / 2) && distance <= (90 + filterAngle / 2)
-    break
+    filterAngle = 120
+    return distance >= (90 - filterAngle / 2) && distance <= (90 + filterAngle / 2)
   case 'down':
-    filterAngle = 105
-    isInsideAngle = distance >= (270 - filterAngle / 2) && distance <= (270 + filterAngle / 2)
-    break
+    filterAngle = 120
+    return distance >= (270 - filterAngle / 2) && distance <= (270 + filterAngle / 2)
   }
-
-  return isInsideAngle
 }
