@@ -404,6 +404,9 @@
       _classCallCheck$2(this, Navigator);
 
       if (config) _config = Object.assign(_config, config);
+      this._teste = 'vitor';
+
+      window.navigation = this;
     }
 
     _createClass$2(Navigator, [{
@@ -498,6 +501,11 @@
     }, {
       key: 'setCurrentFocusedPath',
       value: function setCurrentFocusedPath(focusPath) {
+        var _window = window,
+            navigation = _window.navigation;
+
+        console.log('>>>> setCurrentFocusedPath ', navigation);
+        console.log('>>>> setCurrentFocusedPath ', navigation._teste);
         _focusedPath = focusPath;
         Navigator.focus(focusPath);
       }
