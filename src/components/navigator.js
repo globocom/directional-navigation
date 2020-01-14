@@ -715,7 +715,7 @@ export default class Navigator {
    * Events
    */
 
-  _onMouseOver(evt) {
+  _onMouseOver = evt => {
     const { target } = evt
     if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
       return
@@ -727,7 +727,7 @@ export default class Navigator {
     return preventDefault(evt)
   }
 
-  _onMouseClickOrDown(evt) {
+  _onMouseClickOrDown = evt => {
     const { target } = evt
     if (!target || (!target.classList.contains('focusable') && !target.closest('.focusable')))
       return
@@ -738,7 +738,7 @@ export default class Navigator {
       return preventDefault(evt)
   }
 
-  _onKeyDown(evt) {
+  _onKeyDown = evt => {
     if (!this._sectionCount || this._pause || evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
       return
 
@@ -779,7 +779,7 @@ export default class Navigator {
     return preventDefault(evt)
   }
 
-  _onKeyUp(evt) {
+  _onKeyUp = evt => {
     if (evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
       return
 
@@ -792,7 +792,7 @@ export default class Navigator {
     }
   }
 
-  _onFocus(evt) {
+  _onFocus = evt => {
     const { target } = evt
     if (target !== window && target !== document && this._sectionCount && !this._duringFocusChange) {
       const sectionId = this._getSectionId(target)
@@ -820,7 +820,7 @@ export default class Navigator {
     }
   }
 
-  _onBlur(evt) {
+  _onBlur = evt => {
     const { target } = evt
     if (target !== window
       && target !== document
