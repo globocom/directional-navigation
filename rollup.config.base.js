@@ -14,13 +14,13 @@ const baseConfig = {
     },
   ],
   plugins: [
-    commonjs(),
-    resolve(),
-    namedDirectory(),
     babel({
       exclude: 'node_modules/**',
       externalHelpers: false,
     }),
+    commonjs(),
+    resolve(),
+    namedDirectory(),
     html(),
   ],
 }
