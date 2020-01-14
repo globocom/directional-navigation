@@ -12,6 +12,10 @@ const output = [
       name: 'TVNavigation',
       plugins: [terser({ include: [/^.+\.min\.js$/] })],
     },
+    {
+      file: 'dist/tv-navigation.esm.js',
+      format: 'esm',
+    },
   ],
 ]
 
