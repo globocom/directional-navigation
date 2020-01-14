@@ -1,8 +1,8 @@
 {
-  "name": "js-tv-navigation",
+  "name": "directional-navigation",
   "version": "0.0.1",
-  "description": "New JS implementation of Spatial Navigation by Luke Chang",
-  "main": "dist/tv-navigation.min.js",
+  "description": "Directional navigation that filters elements via frustum and ranks by distance",
+  "main": "dist/directional-navigation.min.js",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "rollup -c",
@@ -19,19 +19,19 @@
   ],
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/vitorcavalcanti/js-tv-navigation.git"
+    "url": "git+https://github.com/globocom/directional-navigation.git"
   },
   "keywords": [
     "tv",
     "spatial",
     "navigation"
   ],
-  "author": "Vitor Cavalcanti <vrcavalcanti@gmail.com>",
+  "author": "Vitor Cavalcanti <vitor.cavalcanti@corp.globo.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/vitorcavalcanti/js-tv-navigation/issues"
+    "url": "https://github.com/globocom/directional-navigation/issues"
   },
-  "homepage": "https://github.com/vitorcavalcanti/js-tv-navigation#readme",
+  "homepage": "https://github.com/globocom/directional-navigation#readme",
   "devDependencies": {
     "babel-core": "^6.26.0",
     "babel-eslint": "^10.0.3",

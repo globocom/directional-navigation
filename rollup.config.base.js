@@ -8,7 +8,7 @@ const baseConfig = {
   input: 'src/index.js',
   output: [
     {
-      file: 'dist/tv-navigation.js',
+      file: 'dist/directional-navigation.js',
       format: 'umd',
       name: 'TVNavigation',
     },

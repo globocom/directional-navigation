@@ -7,13 +7,13 @@ const output = [
   ...baseConfig.output,
   ...[
     {
-      file: 'dist/tv-navigation.min.js',
+      file: 'dist/directional-navigation.min.js',
       format: 'umd',
       name: 'TVNavigation',
       plugins: [terser({ include: [/^.+\.min\.js$/] })],
     },
     {
-      file: 'dist/tv-navigation.esm.js',
+      file: 'dist/directional-navigation.esm.js',
       format: 'esm',
     },
   ],
