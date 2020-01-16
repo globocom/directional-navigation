@@ -62,7 +62,8 @@
   },
   "config": {
     "ghooks": {
-      "pre-commit": "npm run validate"
+      "pre-commit": "npm run lint",
+      "pre-push": "npm run validate"
     }
   }
 }
