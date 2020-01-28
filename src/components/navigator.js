@@ -25,8 +25,6 @@ export default class Navigator {
   constructor(config) {
     this._config = {
       selector: '',
-      straightOnly: false,
-      straightOverlapThreshold: 0.35,
       rememberSource: false,
       disabled: false,
       defaultElement: '',
