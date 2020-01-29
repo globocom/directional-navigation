@@ -11,7 +11,8 @@
     "lint": "eslint *.js src/",
     "lint:fix": "npm run lint -- --fix",
     "start": "rollup -c rollup.config.dev.js",
-    "validate": "npm-run-all --parallel lint test"
+    "validate": "npm-run-all --parallel lint test",
+    "cypress": "cypress open"
   },
   "files": [
     "dist/",
@@ -40,6 +41,7 @@
     "babel-preset-es2015-rollup": "^3.0.0",
     "babel-preset-stage-2": "^6.24.1",
     "clappr-zepto": "0.0.7",
+    "cypress": "^3.8.3",
     "enzyme": "^3.3.0",
     "eslint": "^6.8.0",
     "eslint-plugin-babel": "^4.1.2",
