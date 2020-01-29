@@ -1,0 +1,27 @@
+@import url("main.css");
+
+#chrome {
+  position: absolute;
+  right: 0;
+  /* display: none; */
+}
+
+#internet-explorer {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  /* display: none; */
+}
+
+#apple {
+  position: absolute;
+  bottom: 0;
+  right: 0;
+}
+
+#opera {
+  position: absolute;
+  top: 120px;
+  left: 500px; 
+  background-color: green;
+}

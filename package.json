@@ -12,7 +12,8 @@
     "lint:fix": "npm run lint -- --fix",
     "start": "rollup -c rollup.config.dev.js",
     "validate": "npm-run-all --parallel lint test",
-    "cypress": "cypress open"
+    "cypress": "npm run build && cypress open",
+    "cypressheadless": "npm run build && cypress run"
   },
   "files": [
     "dist/",
