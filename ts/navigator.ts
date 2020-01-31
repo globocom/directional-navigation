@@ -7,8 +7,6 @@ class Navigator {
 
   init() {
     this.bindEvents();
-
-    this.searchFocusableElements().forEach(makeFocusable);
   }
 
   private bindEvents() {
@@ -53,7 +51,7 @@ class Navigator {
   }
 
   private searchFocusableElements(): HTMLElement[] {
-    return [].slice.call(document.querySelectorAll(this.selector))
+    return [].slice.call(document.querySelectorAll(this.selector)).map(makeFocusable);
   }
 
   private get currentOrLastFocusedElement(): HTMLElement | undefined {
@@ -111,10 +109,12 @@ class Navigator {
   }
 }
 
-function makeFocusable(element: HTMLElement) {
+function makeFocusable(element: HTMLElement): HTMLElement {
   if (!element.getAttribute('tabindex')) {
     element.setAttribute('tabindex', '-1')
   }
+
+  return element
 }
 
 function findClosestFocusableElement(target: HTMLElement): HTMLElement | undefined {
