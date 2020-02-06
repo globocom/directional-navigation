@@ -842,7 +842,7 @@ export default class Navigator {
     }
   }
 
-  _handleFocused(event) {
+  _handleFocused = event => {
     if (this._focusedPath !== event.detail.sectionId)
       this.setCurrentFocusedPath(event.detail.sectionId)
   }
