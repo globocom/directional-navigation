@@ -479,6 +479,10 @@ var Navigator = function () {
       }
     };
 
+    this._handleFocused = function (event) {
+      if (_this._focusedPath !== event.detail.sectionId) _this.setCurrentFocusedPath(event.detail.sectionId);
+    };
+
     this._config = _extends({
       selector: '',
       straightOnly: false,
@@ -1172,11 +1176,6 @@ var Navigator = function () {
      * Events
      */
 
-  }, {
-    key: '_handleFocused',
-    value: function _handleFocused(event) {
-      if (this._focusedPath !== event.detail.sectionId) this.setCurrentFocusedPath(event.detail.sectionId);
-    }
   }]);
 
   return Navigator;
