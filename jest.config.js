@@ -7,4 +7,5 @@ module.exports = {
     '!**/*.test.*',
     '!**/*.spec.*',
   ],
+  testPathIgnorePatterns: ['<rootDir>/cypress/'],
 }
