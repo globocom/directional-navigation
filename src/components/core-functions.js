@@ -72,32 +72,18 @@ export const generateDistanceFunction = fromRect => ({
 })
 
 export const prioritize = priorities => {
-  let destPriority
-
-  for (let i = 0; i < priorities.length; i++) {
-    const { group } = priorities[i]
-    if (group && group.length) {
-      destPriority = priorities[i]
-      break
-    }
-  }
-
-  if (!destPriority)
-    return null
-
-  const destDistance = destPriority.distance
-
-  destPriority.group.sort((a, b) => {
-    for (let i = 0; i < destDistance.length; i++) {
-      const distance = destDistance[i]
-      const delta = distance(a) - distance(b)
+  const { group, distance } = priorities
+  group.sort((a, b) => {
+    for (let i = 0; i < distance.length; i++) {
+      const distanceDelta = distance[i]
+      const delta = distanceDelta(a) - distanceDelta(b)
       if (delta)
         return delta
     }
     return 0
   })
 
-  return destPriority.group
+  return group
 }
 
 export const calculateAngle = (cx, cy, ex, ey) => {

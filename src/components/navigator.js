@@ -25,8 +25,6 @@ export default class Navigator {
   constructor(config) {
     this._config = {
       selector: '',
-      straightOnly: false,
-      straightOverlapThreshold: 0.35,
       rememberSource: false,
       disabled: false,
       defaultElement: '',
@@ -342,65 +340,42 @@ export default class Navigator {
 
     const distanceFunction = generateDistanceFunction(targetRect)
     rects = rects.filter(rect => rect.element !== targetRect.element && isInsideAngle(rect, targetRect, direction))
-
-    let priorities
-    switch (direction) {
-    case 'left':
-      priorities = [
-        {
-          group: rects,
-          distance: [
-            distanceFunction.nearestIsBetter,
-            distanceFunction.nearHorizonIsBetter,
-            distanceFunction.topIsBetter,
-          ],
-        },
-      ]
-      break
-    case 'right':
-      priorities = [
-        {
-          group: rects,
-          distance: [
-            distanceFunction.nearestIsBetter,
-            distanceFunction.nearHorizonIsBetter,
-            distanceFunction.topIsBetter,
-          ],
-        },
-      ]
-      break
-    case 'up':
-      priorities = [
-        {
-          group: rects,
-          distance: [
-            distanceFunction.nearestIsBetter,
-            distanceFunction.nearHorizonIsBetter,
-            distanceFunction.leftIsBetter,
-          ],
-        },
-      ]
-      break
-    case 'down':
-      priorities = [
-        {
-          group: rects,
-          distance: [
-            distanceFunction.nearestIsBetter,
-            distanceFunction.nearPlumbLineIsBetter,
-            distanceFunction.topIsBetter,
-            distanceFunction.nearTargetLeftIsBetter,
-          ],
-        },
-      ]
-      break
-    default:
-      return null
-    }
-
-    if (config.straightOnly)
-      priorities.pop()
-
+    const prioritiesFunctions = direction => ({
+      left: {
+        group: rects,
+        distance: [
+          distanceFunction.nearestIsBetter,
+          distanceFunction.nearHorizonIsBetter,
+          distanceFunction.topIsBetter,
+        ],
+      },
+      right: {
+        group: rects,
+        distance: [
+          distanceFunction.nearestIsBetter,
+          distanceFunction.nearHorizonIsBetter,
+          distanceFunction.topIsBetter,
+        ],
+      },
+      up: {
+        group: rects,
+        distance: [
+          distanceFunction.nearestIsBetter,
+          distanceFunction.nearHorizonIsBetter,
+          distanceFunction.leftIsBetter,
+        ],
+      },
+      down: {
+        group: rects,
+        distance: [
+          distanceFunction.nearestIsBetter,
+          distanceFunction.nearPlumbLineIsBetter,
+          distanceFunction.topIsBetter,
+          distanceFunction.nearTargetLeftIsBetter,
+        ],
+      },
+    })[direction]
+    const priorities = prioritiesFunctions(direction)
     const destGroup = prioritize(priorities)
     if (!destGroup)
       return null
