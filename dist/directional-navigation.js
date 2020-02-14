@@ -218,31 +218,20 @@
   };
 
   var prioritize = function prioritize(priorities) {
-    var destPriority = void 0;
+    var _ref = priorities || {},
+        group = _ref.group,
+        distance = _ref.distance;
 
-    for (var i = 0; i < priorities.length; i++) {
-      var group = priorities[i].group;
-
-      if (group && group.length) {
-        destPriority = priorities[i];
-        break;
-      }
-    }
-
-    if (!destPriority) return null;
-
-    var destDistance = destPriority.distance;
-
-    destPriority.group.sort(function (a, b) {
-      for (var _i = 0; _i < destDistance.length; _i++) {
-        var distance = destDistance[_i];
-        var delta = distance(a) - distance(b);
+    group && distance && group.sort(function (a, b) {
+      for (var i = 0; i < distance.length; i++) {
+        var distanceDelta = distance[i];
+        var delta = distanceDelta(a) - distanceDelta(b);
         if (delta) return delta;
       }
       return 0;
     });
 
-    return destPriority.group;
+    return group;
   };
 
   var calculateAngle = function calculateAngle(cx, cy, ex, ey) {
@@ -409,11 +398,12 @@
           if (_this._lastSectionId) currentFocusedElement = _this._getSectionLastFocusedElement(_this._lastSectionId);
 
           if (!currentFocusedElement) {
-            _this.focusSection();
+            _this._focusSection();
             return preventDefault(evt);
           }
         }
 
+        currentSectionId = _this._getSectionId(currentFocusedElement);
         if (!currentSectionId) return;
 
         var willmoveProperties = {
@@ -491,8 +481,6 @@
 
       this._config = _extends({
         selector: '',
-        straightOnly: false,
-        straightOverlapThreshold: 0.35,
         rememberSource: false,
         disabled: false,
         defaultElement: '',
@@ -838,39 +826,27 @@
         rects = rects.filter(function (rect) {
           return rect.element !== targetRect.element && isInsideAngle(rect, targetRect, direction);
         });
-
-        var priorities = void 0;
-        switch (direction) {
-          case 'left':
-            priorities = [{
+        var prioritiesFunctions = function prioritiesFunctions(direction) {
+          return {
+            left: {
               group: rects,
               distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.topIsBetter]
-            }];
-            break;
-          case 'right':
-            priorities = [{
+            },
+            right: {
               group: rects,
               distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.topIsBetter]
-            }];
-            break;
-          case 'up':
-            priorities = [{
+            },
+            up: {
               group: rects,
               distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
-            }];
-            break;
-          case 'down':
-            priorities = [{
+            },
+            down: {
               group: rects,
               distance: [distanceFunction.nearestIsBetter, distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter, distanceFunction.nearTargetLeftIsBetter]
-            }];
-            break;
-          default:
-            return null;
-        }
-
-        if (config.straightOnly) priorities.pop();
-
+            }
+          }[direction];
+        };
+        var priorities = prioritiesFunctions(direction);
         var destGroup = prioritize(priorities);
         if (!destGroup) return null;
 
@@ -880,7 +856,10 @@
             dest = destination.element;
             break;
           }
-        }if (!dest) dest = destGroup[0].element;
+        }if (!dest) {
+          if (destGroup.length === 0) return;
+          dest = destGroup[0].element;
+        }
 
         return dest;
       }
