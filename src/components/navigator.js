@@ -391,8 +391,11 @@ export default class Navigator {
           break
         }
 
-    if (!dest)
+    if (!dest) {
+      if (destGroup.length === 0)
+        return
       dest = destGroup[0].element
+    }
 
     return dest
   }
