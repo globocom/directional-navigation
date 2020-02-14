@@ -721,7 +721,7 @@ export default class Navigator {
       return
 
     let currentFocusedElement = this._getCurrentFocusedElement()
-    const currentSectionId = this._getSectionId(currentFocusedElement)
+    let currentSectionId = this._getSectionId(currentFocusedElement)
     const keyMappping = getKeyMapping(evt.keyCode)
 
     if (!keyMappping)
@@ -742,6 +742,7 @@ export default class Navigator {
       }
     }
 
+    currentSectionId = this._getSectionId(currentFocusedElement)
     if (!currentSectionId)
       return
 
