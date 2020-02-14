@@ -737,7 +737,7 @@ export default class Navigator {
         currentFocusedElement = this._getSectionLastFocusedElement(this._lastSectionId)
 
       if (!currentFocusedElement) {
-        this.focusSection()
+        this._focusSection()
         return preventDefault(evt)
       }
     }
