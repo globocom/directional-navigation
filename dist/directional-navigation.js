@@ -400,6 +400,8 @@
           if (!currentFocusedElement) {
             _this._focusSection();
             return preventDefault(evt);
+          } else {
+            _this.focus(currentFocusedElement);
           }
         }
 
