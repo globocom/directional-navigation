@@ -72,8 +72,8 @@ export const generateDistanceFunction = fromRect => ({
 })
 
 export const prioritize = priorities => {
-  const { group, distance } = priorities
-  group.sort((a, b) => {
+  const { group, distance } = priorities || {}
+  group && distance && group.sort((a, b) => {
     for (let i = 0; i < distance.length; i++) {
       const distanceDelta = distance[i]
       const delta = distanceDelta(a) - distanceDelta(b)

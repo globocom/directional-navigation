@@ -391,8 +391,11 @@ export default class Navigator {
           break
         }
 
-    if (!dest)
+    if (!dest) {
+      if (destGroup.length === 0)
+        return
       dest = destGroup[0].element
+    }
 
     return dest
   }
@@ -718,7 +721,7 @@ export default class Navigator {
       return
 
     let currentFocusedElement = this._getCurrentFocusedElement()
-    const currentSectionId = this._getSectionId(currentFocusedElement)
+    let currentSectionId = this._getSectionId(currentFocusedElement)
     const keyMappping = getKeyMapping(evt.keyCode)
 
     if (!keyMappping)
@@ -733,12 +736,15 @@ export default class Navigator {
       if (this._lastSectionId)
         currentFocusedElement = this._getSectionLastFocusedElement(this._lastSectionId)
 
-      if (!currentFocusedElement) {
-        this.focusSection()
+      if (currentFocusedElement) {
+        this.focus(currentFocusedElement)
+      } else {
+        this._focusSection()
         return preventDefault(evt)
       }
     }
 
+    currentSectionId = this._getSectionId(currentFocusedElement)
     if (!currentSectionId)
       return
 
