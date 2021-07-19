@@ -203,46 +203,35 @@
         return d < 0 ? 0 : d;
       },
       topIsBetter: function topIsBetter(toRect) {
-        return toRect.top;
+        return -1 * toRect.top;
       },
       bottomIsBetter: function bottomIsBetter(toRect) {
-        return -1 * toRect.bottom;
+        return toRect.bottom;
       },
       leftIsBetter: function leftIsBetter(toRect) {
-        return toRect.left;
+        return -1 * toRect.left;
       },
       rightIsBetter: function rightIsBetter(toRect) {
-        return -1 * toRect.right;
+        return toRect.right;
       }
     };
   };
 
   var prioritize = function prioritize(priorities) {
-    var destPriority = void 0;
+    var _ref = priorities || {},
+        group = _ref.group,
+        distance = _ref.distance;
 
-    for (var i = 0; i < priorities.length; i++) {
-      var group = priorities[i].group;
-
-      if (group && group.length) {
-        destPriority = priorities[i];
-        break;
-      }
-    }
-
-    if (!destPriority) return null;
-
-    var destDistance = destPriority.distance;
-
-    destPriority.group.sort(function (a, b) {
-      for (var _i = 0; _i < destDistance.length; _i++) {
-        var distance = destDistance[_i];
-        var delta = distance(a) - distance(b);
+    group && distance && group.sort(function (a, b) {
+      for (var i = 0; i < distance.length; i++) {
+        var distanceDelta = distance[i];
+        var delta = distanceDelta(a) - distanceDelta(b);
         if (delta) return delta;
       }
       return 0;
     });
 
-    return destPriority.group;
+    return group;
   };
 
   var calculateAngle = function calculateAngle(cx, cy, ex, ey) {
@@ -263,23 +252,38 @@
         sourceY = _sourceRect$center.y;
 
 
-    var filterAngle = void 0;
+    console.log('>>>>> sourceX:', sourceX);
+    // sourceX += (direction === 'left' ? -1 : 1) * (sourceRect.width / 2)
+    console.log('>>>>> new sourceX:', sourceX);
+
+    var filterAngle = void 0,
+        isInside = void 0;
     var distance = calculateAngle(rectX, rectY, sourceX, sourceY);
 
     switch (direction) {
       case 'left':
         filterAngle = 60;
-        return distance <= filterAngle / 2 || distance >= 360 - filterAngle / 2;
+        isInside = distance <= filterAngle / 2 || distance >= 360 - filterAngle / 2;
+        break;
       case 'right':
         filterAngle = 60;
-        return distance >= 180 - filterAngle / 2 && distance <= 180 + filterAngle / 2;
+        isInside = distance >= 180 - filterAngle / 2 && distance <= 180 + filterAngle / 2;
+        break;
       case 'up':
         filterAngle = 120;
-        return distance >= 90 - filterAngle / 2 && distance <= 90 + filterAngle / 2;
+        // filterAngle = 170
+        isInside = distance >= 90 - filterAngle / 2 && distance <= 90 + filterAngle / 2;
+        break;
       case 'down':
         filterAngle = 120;
-        return distance >= 270 - filterAngle / 2 && distance <= 270 + filterAngle / 2;
+        // filterAngle = 170
+        isInside = distance >= 270 - filterAngle / 2 && distance <= 270 + filterAngle / 2;
+        break;
     }
+
+    console.log('>>>>> isInsideAngle ', { isInside: isInside }, { rect: rect, sourceRect: sourceRect, direction: direction });
+
+    return isInside;
   };
 
   var KEYMAPPING = {
@@ -408,12 +412,15 @@
         if (!currentFocusedElement) {
           if (_this._lastSectionId) currentFocusedElement = _this._getSectionLastFocusedElement(_this._lastSectionId);
 
-          if (!currentFocusedElement) {
-            _this.focusSection();
+          if (currentFocusedElement) {
+            _this.focus(currentFocusedElement);
+          } else {
+            _this._focusSection();
             return preventDefault(evt);
           }
         }
 
+        currentSectionId = _this._getSectionId(currentFocusedElement);
         if (!currentSectionId) return;
 
         var willmoveProperties = {
@@ -491,8 +498,6 @@
 
       this._config = _extends({
         selector: '',
-        straightOnly: false,
-        straightOverlapThreshold: 0.35,
         rememberSource: false,
         disabled: false,
         defaultElement: '',
@@ -821,6 +826,7 @@
     }, {
       key: '_navigate',
       value: function _navigate(target, direction, candidates, config) {
+        console.log('>>>>> _navigate', { target: target, direction: direction, candidates: candidates, config: config });
         if (!target || !direction || !candidates || !candidates.length) return null;
 
         var targetRect = getRect(target);
@@ -838,40 +844,37 @@
         rects = rects.filter(function (rect) {
           return rect.element !== targetRect.element && isInsideAngle(rect, targetRect, direction);
         });
-
-        var priorities = void 0;
-        switch (direction) {
-          case 'left':
-            priorities = [{
+        var prioritiesFunctions = function prioritiesFunctions(direction) {
+          return {
+            left: {
               group: rects,
-              distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.topIsBetter]
-            }];
-            break;
-          case 'right':
-            priorities = [{
+              distance: [
+              // distanceFunction.leftIsBetter,
+              distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
+            },
+            right: {
               group: rects,
-              distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.topIsBetter]
-            }];
-            break;
-          case 'up':
-            priorities = [{
+              distance: [
+              // distanceFunction.rightIsBetter,
+              distanceFunction.nearHorizonIsBetter, distanceFunction.nearestIsBetter, distanceFunction.topIsBetter]
+            },
+            up: {
               group: rects,
-              distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
-            }];
-            break;
-          case 'down':
-            priorities = [{
+              distance: [
+              // distanceFunction.topIsBetter,
+              distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
+            },
+            down: {
               group: rects,
-              distance: [distanceFunction.nearestIsBetter, distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter, distanceFunction.nearTargetLeftIsBetter]
-            }];
-            break;
-          default:
-            return null;
-        }
-
-        if (config.straightOnly) priorities.pop();
-
+              distance: [
+              // distanceFunction.bottomIsBetter,
+              distanceFunction.nearestIsBetter, distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter, distanceFunction.nearTargetLeftIsBetter]
+            }
+          }[direction];
+        };
+        var priorities = prioritiesFunctions(direction);
         var destGroup = prioritize(priorities);
+        console.log('>>>>> _navigate, destGroup: ', destGroup);
         if (!destGroup) return null;
 
         var dest = void 0;
@@ -880,7 +883,10 @@
             dest = destination.element;
             break;
           }
-        }if (!dest) dest = destGroup[0].element;
+        }if (!dest) {
+          if (destGroup.length === 0) return;
+          dest = destGroup[0].element;
+        }
 
         return dest;
       }
@@ -903,7 +909,9 @@
     }, {
       key: '_focusNext',
       value: function _focusNext(direction, currentFocusedElement, currentSectionId) {
+        console.log('>>>>> _focusNext', { direction: direction, currentFocusedElement: currentFocusedElement, currentSectionId: currentSectionId });
         var extSelector = currentFocusedElement.getAttribute('data-sn-' + direction);
+        console.log('>>>>> _focusNext', { extSelector: extSelector });
         if (typeof extSelector === 'string') {
           if (extSelector === '' || !this._focusExtendedSelector(extSelector, direction)) {
             this._fireNavigateFailed(currentFocusedElement, direction);
@@ -936,6 +944,8 @@
           candidates = exclude(allNavigableElements, currentFocusedElement);
           next = this._navigate(currentFocusedElement, direction, candidates, config);
         }
+
+        console.log('>>>>> _focusNext', { candidates: candidates, next: next });
 
         if (next) {
           this._sections[currentSectionId].previous = {
@@ -971,6 +981,7 @@
           return true;
         }
 
+        console.log('>>>>> _focusNext, _fireNavigateFailed', { currentFocusedElement: currentFocusedElement, direction: direction });
         this._fireNavigateFailed(currentFocusedElement, direction);
         return false;
       }

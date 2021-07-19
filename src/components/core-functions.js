@@ -65,15 +65,15 @@ export const generateDistanceFunction = fromRect => ({
     // console.log('>>>> nearTargetTopIsBetter ', toRect.element.id, d)
     return d < 0 ? 0 : d
   },
-  topIsBetter: toRect => toRect.top,
-  bottomIsBetter: toRect => -1 * toRect.bottom,
-  leftIsBetter: toRect => toRect.left,
-  rightIsBetter: toRect => -1 * toRect.right,
+  topIsBetter: toRect => -1 * toRect.top,
+  bottomIsBetter: toRect => toRect.bottom,
+  leftIsBetter: toRect => -1 * toRect.left,
+  rightIsBetter: toRect => toRect.right,
 })
 
 export const prioritize = priorities => {
-  const { group, distance } = priorities
-  group.sort((a, b) => {
+  const { group, distance } = priorities || {}
+  group && distance && group.sort((a, b) => {
     for (let i = 0; i < distance.length; i++) {
       const distanceDelta = distance[i]
       const delta = distanceDelta(a) - distanceDelta(b)
@@ -97,23 +97,37 @@ export const calculateAngle = (cx, cy, ex, ey) => {
 
 export const isInsideAngle = (rect, sourceRect, direction) => {
   const { x: rectX, y: rectY } = rect.center
-  const { x: sourceX, y: sourceY } = sourceRect.center
+  let { x: sourceX, y: sourceY } = sourceRect.center
 
-  let filterAngle
+  console.log('>>>>> sourceX:', sourceX)
+  // sourceX += (direction === 'left' ? -1 : 1) * (sourceRect.width / 2)
+  console.log('>>>>> new sourceX:', sourceX)
+
+  let filterAngle, isInside
   const distance = calculateAngle(rectX, rectY, sourceX, sourceY)
 
   switch (direction) {
   case 'left':
     filterAngle = 60
-    return distance <= filterAngle / 2 || distance >= (360 - filterAngle / 2)
+    isInside = distance <= filterAngle / 2 || distance >= (360 - filterAngle / 2)
+    break
   case 'right':
     filterAngle = 60
-    return distance >= (180 - filterAngle / 2) && distance <= (180 + filterAngle / 2)
+    isInside = distance >= (180 - filterAngle / 2) && distance <= (180 + filterAngle / 2)
+    break
   case 'up':
     filterAngle = 120
-    return distance >= (90 - filterAngle / 2) && distance <= (90 + filterAngle / 2)
+    // filterAngle = 170
+    isInside = distance >= (90 - filterAngle / 2) && distance <= (90 + filterAngle / 2)
+    break
   case 'down':
     filterAngle = 120
-    return distance >= (270 - filterAngle / 2) && distance <= (270 + filterAngle / 2)
+    // filterAngle = 170
+    isInside = distance >= (270 - filterAngle / 2) && distance <= (270 + filterAngle / 2)
+    break
   }
+
+  console.log('>>>>> isInsideAngle ', { isInside }, { rect, sourceRect, direction })
+
+  return isInside
 }

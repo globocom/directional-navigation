@@ -321,6 +321,7 @@ export default class Navigator {
   }
 
   _navigate(target, direction, candidates, config) {
+    console.log('>>>>> _navigate', { target, direction, candidates, config })
     if (!target || !direction || !candidates || !candidates.length)
       return null
 
@@ -344,39 +345,44 @@ export default class Navigator {
       left: {
         group: rects,
         distance: [
-          distanceFunction.nearestIsBetter,
-          distanceFunction.nearHorizonIsBetter,
-          distanceFunction.topIsBetter,
+          distanceFunction.leftIsBetter,
+          // distanceFunction.nearHorizonIsBetter,
+          // distanceFunction.nearestIsBetter,
+          // distanceFunction.topIsBetter,
         ],
       },
       right: {
         group: rects,
         distance: [
-          distanceFunction.nearestIsBetter,
-          distanceFunction.nearHorizonIsBetter,
-          distanceFunction.topIsBetter,
+          distanceFunction.rightIsBetter,
+          // distanceFunction.nearHorizonIsBetter,
+          // distanceFunction.nearestIsBetter,
+          // distanceFunction.topIsBetter,
         ],
       },
       up: {
         group: rects,
         distance: [
-          distanceFunction.nearestIsBetter,
-          distanceFunction.nearHorizonIsBetter,
-          distanceFunction.leftIsBetter,
+          distanceFunction.topIsBetter,
+          // distanceFunction.nearestIsBetter,
+          // distanceFunction.nearHorizonIsBetter,
+          // distanceFunction.leftIsBetter,
         ],
       },
       down: {
         group: rects,
         distance: [
-          distanceFunction.nearestIsBetter,
-          distanceFunction.nearPlumbLineIsBetter,
-          distanceFunction.topIsBetter,
-          distanceFunction.nearTargetLeftIsBetter,
+          distanceFunction.bottomIsBetter,
+          // distanceFunction.nearestIsBetter,
+          // distanceFunction.nearPlumbLineIsBetter,
+          // distanceFunction.topIsBetter,
+          // distanceFunction.nearTargetLeftIsBetter,
         ],
       },
     })[direction]
     const priorities = prioritiesFunctions(direction)
     const destGroup = prioritize(priorities)
+    console.log('>>>>> _navigate, destGroup: ', destGroup)
     if (!destGroup)
       return null
 
@@ -391,8 +397,11 @@ export default class Navigator {
           break
         }
 
-    if (!dest)
+    if (!dest) {
+      if (destGroup.length === 0)
+        return
       dest = destGroup[0].element
+    }
 
     return dest
   }
@@ -418,7 +427,9 @@ export default class Navigator {
   }
 
   _focusNext(direction, currentFocusedElement, currentSectionId) {
+    console.log('>>>>> _focusNext', { direction, currentFocusedElement, currentSectionId })
     const extSelector = currentFocusedElement.getAttribute(`data-sn-${direction}`)
+    console.log('>>>>> _focusNext', { extSelector })
     if (typeof extSelector === 'string') {
       if (extSelector === ''
         || !this._focusExtendedSelector(extSelector, direction)) {
@@ -454,6 +465,8 @@ export default class Navigator {
       candidates = exclude(allNavigableElements, currentFocusedElement)
       next = this._navigate(currentFocusedElement, direction, candidates, config)
     }
+
+    console.log('>>>>> _focusNext', { candidates, next })
 
     if (next) {
       this._sections[currentSectionId].previous = {
@@ -491,6 +504,7 @@ export default class Navigator {
       return true
     }
 
+    console.log('>>>>> _focusNext, _fireNavigateFailed', { currentFocusedElement, direction })
     this._fireNavigateFailed(currentFocusedElement, direction)
     return false
   }
@@ -718,7 +732,7 @@ export default class Navigator {
       return
 
     let currentFocusedElement = this._getCurrentFocusedElement()
-    const currentSectionId = this._getSectionId(currentFocusedElement)
+    let currentSectionId = this._getSectionId(currentFocusedElement)
     const keyMappping = getKeyMapping(evt.keyCode)
 
     if (!keyMappping)
@@ -733,12 +747,15 @@ export default class Navigator {
       if (this._lastSectionId)
         currentFocusedElement = this._getSectionLastFocusedElement(this._lastSectionId)
 
-      if (!currentFocusedElement) {
-        this.focusSection()
+      if (currentFocusedElement) {
+        this.focus(currentFocusedElement)
+      } else {
+        this._focusSection()
         return preventDefault(evt)
       }
     }
 
+    currentSectionId = this._getSectionId(currentFocusedElement)
     if (!currentSectionId)
       return
 

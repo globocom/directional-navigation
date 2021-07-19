@@ -3,6 +3,7 @@
   "version": "0.0.1",
   "description": "Directional navigation that filters elements via frustum and ranks by distance",
   "main": "dist/directional-navigation.min.js",
+  "module": "dist/directional-navigation.esm.js",
   "scripts": {
     "prebuild": "rimraf dist",
     "build": "rollup -c",
