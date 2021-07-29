@@ -1,4 +1,5 @@
 import MinkowskiDistance from '../aux/minkowski-distance'
+import { KeyName } from '../constants'
 
 export const getRect = element => {
   const cr = element.getBoundingClientRect()
@@ -103,16 +104,16 @@ export const isInsideAngle = (rect, sourceRect, direction) => {
   const distance = calculateAngle(rectX, rectY, sourceX, sourceY)
 
   switch (direction) {
-  case 'left':
+  case KeyName.LEFT:
     filterAngle = 60
     return distance <= filterAngle / 2 || distance >= (360 - filterAngle / 2)
-  case 'right':
+  case KeyName.RIGHT:
     filterAngle = 60
     return distance >= (180 - filterAngle / 2) && distance <= (180 + filterAngle / 2)
-  case 'up':
+  case KeyName.UP:
     filterAngle = 120
     return distance >= (90 - filterAngle / 2) && distance <= (90 + filterAngle / 2)
-  case 'down':
+  case KeyName.DOWN:
     filterAngle = 120
     return distance >= (270 - filterAngle / 2) && distance <= (270 + filterAngle / 2)
   }

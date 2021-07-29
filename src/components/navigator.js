@@ -12,7 +12,6 @@
 import '../misc/polyfills'
 import EventsManager from './events-manager'
 import { getRect, generateDistanceFunction, prioritize, isInsideAngle } from './core-functions'
-import { getKeyMapping } from '../misc/key-mapping'
 import {
   exclude,
   getReverse,
@@ -20,6 +19,7 @@ import {
   parseSelector,
   preventDefault,
 } from '../misc/utils'
+import { KeyCode, KeyName } from '../constants'
 
 export default class Navigator {
   constructor(config) {
@@ -35,6 +35,13 @@ export default class Navigator {
       navigableFilter: null,
       eventPrefix: 'sn:',
       idPoolPrefix: 'section-',
+      keyMap: {
+        left: KeyCode.LEFT,
+        up: KeyCode.UP,
+        right: KeyCode.RIGHT,
+        down: KeyCode.DOWN,
+        enter: KeyCode.ENTER,
+      },
       ...config,
     }
 
@@ -281,6 +288,8 @@ export default class Navigator {
       this._defaultSectionId = ''
   }
 
+  getConfig() { return this._config }
+
   getCurrentFocusedPath() { return this._focusedPath }
 
   setCurrentFocusedPath(focusPath) {
@@ -299,6 +308,17 @@ export default class Navigator {
   /**
    * Private methods
    */
+
+  _mapToKeyName(keyCode) {
+    switch (keyCode) {
+    case this._config.keyMap.left: return KeyName.LEFT
+    case this._config.keyMap.up: return KeyName.UP
+    case this._config.keyMap.right: return KeyName.RIGHT
+    case this._config.keyMap.down: return KeyName.DOWN
+    case this._config.keyMap.enter: return KeyName.ENTER
+    default: return null
+    }
+  }
 
   _makeFocusable(sectionId) {
     const doMakeFocusable = section => {
@@ -341,7 +361,7 @@ export default class Navigator {
     const distanceFunction = generateDistanceFunction(targetRect)
     rects = rects.filter(rect => rect.element !== targetRect.element && isInsideAngle(rect, targetRect, direction))
     const prioritiesFunctions = direction => ({
-      left: {
+      [KeyName.LEFT]: {
         group: rects,
         distance: [
           distanceFunction.nearestIsBetter,
@@ -349,7 +369,7 @@ export default class Navigator {
           distanceFunction.topIsBetter,
         ],
       },
-      right: {
+      [KeyName.RIGHT]: {
         group: rects,
         distance: [
           distanceFunction.nearestIsBetter,
@@ -357,7 +377,7 @@ export default class Navigator {
           distanceFunction.topIsBetter,
         ],
       },
-      up: {
+      [KeyName.UP]: {
         group: rects,
         distance: [
           distanceFunction.nearestIsBetter,
@@ -365,7 +385,7 @@ export default class Navigator {
           distanceFunction.leftIsBetter,
         ],
       },
-      down: {
+      [KeyName.DOWN]: {
         group: rects,
         distance: [
           distanceFunction.nearestIsBetter,
@@ -722,12 +742,12 @@ export default class Navigator {
 
     let currentFocusedElement = this._getCurrentFocusedElement()
     let currentSectionId = this._getSectionId(currentFocusedElement)
-    const keyMappping = getKeyMapping(evt.keyCode)
+    const keyMappping = this._mapToKeyName(evt.keyCode)
 
     if (!keyMappping)
       return
 
-    if (keyMappping === 'enter')
+    if (keyMappping === KeyName.ENTER)
       if (currentFocusedElement && currentSectionId)
         if (!this.fireEvent(currentFocusedElement, 'enter-down'))
           return preventDefault(evt)
@@ -764,7 +784,7 @@ export default class Navigator {
     if (evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey)
       return
 
-    if (!this._pause && this._sectionCount && getKeyMapping(evt.keyCode) === 'center') {
+    if (!this._pause && this._sectionCount && this._mapToKeyName(evt.keyCode) === KeyName.ENTER) {
       const currentFocusedElement = this._getCurrentFocusedElement()
       if (currentFocusedElement && this._getSectionId(currentFocusedElement))
         if (!this.fireEvent(currentFocusedElement, 'enter-up')) {

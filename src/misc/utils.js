@@ -1,3 +1,5 @@
+import { KeyName } from '../constants'
+
 export const preventDefault = evt => {
   evt.preventDefault()
   evt.stopPropagation()
@@ -39,9 +41,9 @@ export const exclude = (elemList, excludedElem) => {
 
 export const getReverse = direction => (
   {
-    left: 'right',
-    up: 'down',
-    right: 'left',
-    down: 'up',
+    [KeyName.LEFT]: KeyName.RIGHT,
+    [KeyName.UP]: KeyName.DOWN,
+    [KeyName.RIGHT]: KeyName.LEFT,
+    [KeyName.DOWN]: KeyName.UP,
   }[direction]
 )
