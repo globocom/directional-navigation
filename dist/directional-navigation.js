@@ -148,6 +148,22 @@
 
   var MinkowskiDistance$1 = new MinkowskiDistance();
 
+  var KeyCode = Object.freeze({
+    LEFT: 37,
+    UP: 38,
+    RIGHT: 39,
+    DOWN: 40,
+    ENTER: 13
+  });
+
+  var KeyName = Object.freeze({
+    LEFT: 'left',
+    UP: 'up',
+    RIGHT: 'right',
+    DOWN: 'down',
+    ENTER: 'enter'
+  });
+
   var getRect = function getRect(element) {
     var cr = element.getBoundingClientRect();
     var rect = {
@@ -256,59 +272,24 @@
     var distance = calculateAngle(rectX, rectY, sourceX, sourceY);
 
     switch (direction) {
-      case 'left':
+      case KeyName.LEFT:
         filterAngle = 60;
         return distance <= filterAngle / 2 || distance >= 360 - filterAngle / 2;
-      case 'right':
+      case KeyName.RIGHT:
         filterAngle = 60;
         return distance >= 180 - filterAngle / 2 && distance <= 180 + filterAngle / 2;
-      case 'up':
+      case KeyName.UP:
         filterAngle = 120;
         return distance >= 90 - filterAngle / 2 && distance <= 90 + filterAngle / 2;
-      case 'down':
+      case KeyName.DOWN:
         filterAngle = 120;
         return distance >= 270 - filterAngle / 2 && distance <= 270 + filterAngle / 2;
     }
   };
 
-  var KEYMAPPING = {
-    4: 'left',
-    21: 'left',
-    37: 'left',
-    214: 'left',
-    205: 'left',
-    218: 'left',
-    5: 'right',
-    22: 'right',
-    39: 'right',
-    213: 'right',
-    206: 'right',
-    217: 'right',
-    29460: 'up',
-    19: 'up',
-    38: 'up',
-    211: 'up',
-    203: 'up',
-    215: 'up',
-    29461: 'down',
-    20: 'down',
-    40: 'down',
-    212: 'down',
-    204: 'down',
-    216: 'down',
-    29443: 'enter',
-    13: 'enter',
-    67: 'enter',
-    32: 'enter',
-    23: 'enter',
-    195: 'enter'
-  };
-
-  var getKeyMapping = function getKeyMapping(keyCode) {
-    return KEYMAPPING[keyCode];
-  };
-
   var _typeof = typeof Symbol === "function" && typeof Symbol.iterator === "symbol" ? function (obj) { return typeof obj; } : function (obj) { return obj && typeof Symbol === "function" && obj.constructor === Symbol && obj !== Symbol.prototype ? "symbol" : typeof obj; };
+
+  function _defineProperty(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
   var preventDefault = function preventDefault(evt) {
     evt.preventDefault();
@@ -337,12 +318,9 @@
   };
 
   var getReverse = function getReverse(direction) {
-    return {
-      left: 'right',
-      up: 'down',
-      right: 'left',
-      down: 'up'
-    }[direction];
+    var _KeyName$LEFT$KeyName;
+
+    return (_KeyName$LEFT$KeyName = {}, _defineProperty(_KeyName$LEFT$KeyName, KeyName.LEFT, KeyName.RIGHT), _defineProperty(_KeyName$LEFT$KeyName, KeyName.UP, KeyName.DOWN), _defineProperty(_KeyName$LEFT$KeyName, KeyName.RIGHT, KeyName.LEFT), _defineProperty(_KeyName$LEFT$KeyName, KeyName.DOWN, KeyName.UP), _KeyName$LEFT$KeyName)[direction];
   };
 
   var _slicedToArray = function () { function sliceIterator(arr, i) { var _arr = []; var _n = true; var _d = false; var _e = undefined; try { for (var _i = arr[Symbol.iterator](), _s; !(_n = (_s = _i.next()).done); _n = true) { _arr.push(_s.value); if (i && _arr.length === i) break; } } catch (err) { _d = true; _e = err; } finally { try { if (!_n && _i["return"]) _i["return"](); } finally { if (_d) throw _e; } } return _arr; } return function (arr, i) { if (Array.isArray(arr)) { return arr; } else if (Symbol.iterator in Object(arr)) { return sliceIterator(arr, i); } else { throw new TypeError("Invalid attempt to destructure non-iterable instance"); } }; }();
@@ -352,6 +330,8 @@
   var _extends = Object.assign || function (target) { for (var i = 1; i < arguments.length; i++) { var source = arguments[i]; for (var key in source) { if (Object.prototype.hasOwnProperty.call(source, key)) { target[key] = source[key]; } } } return target; };
 
   var _createClass$2 = function () { function defineProperties(target, props) { for (var i = 0; i < props.length; i++) { var descriptor = props[i]; descriptor.enumerable = descriptor.enumerable || false; descriptor.configurable = true; if ("value" in descriptor) descriptor.writable = true; Object.defineProperty(target, descriptor.key, descriptor); } } return function (Constructor, protoProps, staticProps) { if (protoProps) defineProperties(Constructor.prototype, protoProps); if (staticProps) defineProperties(Constructor, staticProps); return Constructor; }; }();
+
+  function _defineProperty$1(obj, key, value) { if (key in obj) { Object.defineProperty(obj, key, { value: value, enumerable: true, configurable: true, writable: true }); } else { obj[key] = value; } return obj; }
 
   function _classCallCheck$2(instance, Constructor) { if (!(instance instanceof Constructor)) { throw new TypeError("Cannot call a class as a function"); } }
 
@@ -388,20 +368,20 @@
 
         var currentFocusedElement = _this._getCurrentFocusedElement();
         var currentSectionId = _this._getSectionId(currentFocusedElement);
-        var keyMappping = getKeyMapping(evt.keyCode);
+        var keyMappping = _this._mapToKeyName(evt.keyCode);
 
         if (!keyMappping) return;
 
-        if (keyMappping === 'enter') if (currentFocusedElement && currentSectionId) if (!_this.fireEvent(currentFocusedElement, 'enter-down')) return preventDefault(evt);
+        if (keyMappping === KeyName.ENTER) if (currentFocusedElement && currentSectionId) if (!_this.fireEvent(currentFocusedElement, 'enter-down')) return preventDefault(evt);
 
         if (!currentFocusedElement) {
           if (_this._lastSectionId) currentFocusedElement = _this._getSectionLastFocusedElement(_this._lastSectionId);
 
-          if (!currentFocusedElement) {
+          if (currentFocusedElement) {
+            _this.focus(currentFocusedElement);
+          } else {
             _this._focusSection();
             return preventDefault(evt);
-          } else {
-            _this.focus(currentFocusedElement);
           }
         }
 
@@ -422,7 +402,7 @@
       this._onKeyUp = function (evt) {
         if (evt.altKey || evt.ctrlKey || evt.metaKey || evt.shiftKey) return;
 
-        if (!_this._pause && _this._sectionCount && getKeyMapping(evt.keyCode) === 'center') {
+        if (!_this._pause && _this._sectionCount && _this._mapToKeyName(evt.keyCode) === KeyName.ENTER) {
           var currentFocusedElement = _this._getCurrentFocusedElement();
           if (currentFocusedElement && _this._getSectionId(currentFocusedElement)) if (!_this.fireEvent(currentFocusedElement, 'enter-up')) {
             preventDefault(evt);
@@ -492,7 +472,14 @@
         tabIndexIgnoreList: [],
         navigableFilter: null,
         eventPrefix: 'sn:',
-        idPoolPrefix: 'section-'
+        idPoolPrefix: 'section-',
+        keyMap: {
+          left: KeyCode.LEFT,
+          up: KeyCode.UP,
+          right: KeyCode.RIGHT,
+          down: KeyCode.DOWN,
+          enter: KeyCode.ENTER
+        }
       }, config);
 
       this._idPool = 0;
@@ -761,6 +748,11 @@
         } else this._defaultSectionId = '';
       }
     }, {
+      key: 'getConfig',
+      value: function getConfig() {
+        return this._config;
+      }
+    }, {
       key: 'getCurrentFocusedPath',
       value: function getCurrentFocusedPath() {
         return this._focusedPath;
@@ -790,6 +782,24 @@
        * Private methods
        */
 
+    }, {
+      key: '_mapToKeyName',
+      value: function _mapToKeyName(keyCode) {
+        switch (keyCode) {
+          case this._config.keyMap.left:
+            return KeyName.LEFT;
+          case this._config.keyMap.up:
+            return KeyName.UP;
+          case this._config.keyMap.right:
+            return KeyName.RIGHT;
+          case this._config.keyMap.down:
+            return KeyName.DOWN;
+          case this._config.keyMap.enter:
+            return KeyName.ENTER;
+          default:
+            return null;
+        }
+      }
     }, {
       key: '_makeFocusable',
       value: function _makeFocusable(sectionId) {
@@ -829,24 +839,21 @@
           return rect.element !== targetRect.element && isInsideAngle(rect, targetRect, direction);
         });
         var prioritiesFunctions = function prioritiesFunctions(direction) {
-          return {
-            left: {
-              group: rects,
-              distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.topIsBetter]
-            },
-            right: {
-              group: rects,
-              distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.topIsBetter]
-            },
-            up: {
-              group: rects,
-              distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
-            },
-            down: {
-              group: rects,
-              distance: [distanceFunction.nearestIsBetter, distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter, distanceFunction.nearTargetLeftIsBetter]
-            }
-          }[direction];
+          var _KeyName$LEFT$KeyName;
+
+          return (_KeyName$LEFT$KeyName = {}, _defineProperty$1(_KeyName$LEFT$KeyName, KeyName.LEFT, {
+            group: rects,
+            distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.topIsBetter]
+          }), _defineProperty$1(_KeyName$LEFT$KeyName, KeyName.RIGHT, {
+            group: rects,
+            distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.topIsBetter]
+          }), _defineProperty$1(_KeyName$LEFT$KeyName, KeyName.UP, {
+            group: rects,
+            distance: [distanceFunction.nearestIsBetter, distanceFunction.nearHorizonIsBetter, distanceFunction.leftIsBetter]
+          }), _defineProperty$1(_KeyName$LEFT$KeyName, KeyName.DOWN, {
+            group: rects,
+            distance: [distanceFunction.nearestIsBetter, distanceFunction.nearPlumbLineIsBetter, distanceFunction.topIsBetter, distanceFunction.nearTargetLeftIsBetter]
+          }), _KeyName$LEFT$KeyName)[direction];
         };
         var priorities = prioritiesFunctions(direction);
         var destGroup = prioritize(priorities);
