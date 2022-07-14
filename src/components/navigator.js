@@ -155,6 +155,7 @@ export default class Navigator {
 
     if (this._sections[sectionId]) {
       this._sections[sectionId] = undefined
+      delete this._sections[sectionId]
       this._sections = { ...this._sections }
       this._sectionCount--
       return true
