@@ -605,6 +605,7 @@ var Navigator = function () {
 
       if (this._sections[sectionId]) {
         this._sections[sectionId] = undefined;
+        delete this._sections[sectionId];
         this._sections = _extends({}, this._sections);
         this._sectionCount--;
         return true;
